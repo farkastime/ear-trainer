@@ -35,4 +35,17 @@ describe('createSafeStorage', () => {
     createSafeStorage(backing).removeItem(STORAGE_KEY)
     expect(backing.getItem(STORAGE_KEY)).toBeNull()
   })
+
+  it('a failing backup write during getItem does not throw', () => {
+    const backing = createMemoryStorage()
+    backing.setItem(STORAGE_KEY, '{not json')
+    backing.setItem = () => {
+      throw new Error('quota')
+    }
+    const safe = createSafeStorage(backing)
+    expect(() => safe.getItem(STORAGE_KEY)).not.toThrow()
+    expect(safe.getItem(STORAGE_KEY)).toBeNull()
+    expect(safe.corrupted).toBe(true)
+    expect(safe.writeFailed).toBe(true)
+  })
 })

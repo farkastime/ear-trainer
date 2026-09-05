@@ -20,8 +20,13 @@ export function createSafeStorage(backing: Storage): SafeStorage {
         JSON.parse(raw)
         return raw
       } catch {
-        backing.setItem(BACKUP_KEY, raw)
-        backing.removeItem(name)
+        try {
+          // Single backup slot: a newer corruption replaces an older backup.
+          backing.setItem(BACKUP_KEY, raw)
+          backing.removeItem(name)
+        } catch {
+          safe.writeFailed = true
+        }
         safe.corrupted = true
         return null
       }

@@ -1,9 +1,21 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { App } from './App'
+import { useAppStore } from './state/store'
+import { App } from './ui/App'
+import { AudioProvider } from './ui/AudioContext'
+import './ui/styles.css'
+
+declare global {
+  interface Window {
+    __earTrainer: typeof useAppStore
+  }
+}
+window.__earTrainer = useAppStore
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <AudioProvider>
+      <App />
+    </AudioProvider>
   </StrictMode>,
 )

@@ -167,8 +167,12 @@ selectable in parent settings. There is no unlock gating in v1.
 8. If the pacing policy fires during the session, the level-up moment
    (§6.3) runs immediately and the session then continues with the new
    chord live.
-9. On reaching the target: **session summary** (§7.3), then home. The child
-   can also end early via a small exit control.
+9. On reaching the target: **session summary** (§7.3). The child can also
+   end early via a small exit control; an early exit still gets a summary,
+   but a session counts toward the Eguchi policy's session gate only if it
+   reached at least half the target. **Play again** on the summary starts a
+   fresh session (cold streak, full working set) so an engaged child can
+   chain sittings.
 
 ### 5.3 Get-ready ritual
 

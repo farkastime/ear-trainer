@@ -10,11 +10,15 @@ interface Props {
   napping: boolean
   flash: TileFlash
   disabled: boolean
+  /** Faded while feedback plays and while the next question chord sounds. */
+  dimmed?: boolean
   onTap: (id: string) => void
 }
 
-export function ChordTile({ chord, showLetters, napping, flash, disabled, onTap }: Props) {
-  const cls = ['tile', napping ? 'napping' : '', flash ?? ''].filter(Boolean).join(' ')
+export function ChordTile({ chord, showLetters, napping, flash, disabled, dimmed, onTap }: Props) {
+  const cls = ['tile', napping ? 'napping' : '', dimmed ? 'dim' : '', flash ?? '']
+    .filter(Boolean)
+    .join(' ')
   return (
     <button
       className={cls}

@@ -62,11 +62,13 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
   useEffect(() => {
     if (session.phase !== 'question' || !session.currentChordId || pendingPrimer) return
     const id = session.currentChordId
+    // Listening starts with the question, not the chord, so tiles stay dimmed
+    // through the short delay before playback.
+    setListening(true)
     let done: ReturnType<typeof setTimeout> | undefined
     const t = setTimeout(() => {
       const seconds = randomDuration(Math.random)
       play(id, seconds)
-      setListening(true)
       done = setTimeout(() => setListening(false), seconds * 1000)
     }, QUESTION_DELAY_MS)
     return () => {
@@ -146,6 +148,7 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
             napping={progression.napping === id}
             flash={flashFor(id)}
             disabled={inputLocked}
+            dimmed={session.phase !== 'question' || listening}
             onTap={onTap}
           />
         ))}

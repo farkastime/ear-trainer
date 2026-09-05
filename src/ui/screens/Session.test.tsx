@@ -106,13 +106,30 @@ describe('Session', () => {
   it('shows a listening cue while the question chord plays, and not during feedback', () => {
     useAppStore.getState().startSession()
     renderApp(<Session />)
-    expect(screen.queryByTestId('listening')).toBeNull()
+    expect(screen.getByTestId('listening')).toBeInTheDocument()
     act(() => vi.advanceTimersByTime(200))
     expect(screen.getByTestId('listening')).toBeInTheDocument()
     act(() => vi.advanceTimersByTime(2600))
     expect(screen.queryByTestId('listening')).toBeNull()
     fireEvent.click(tile(current()))
     expect(screen.queryByTestId('listening')).toBeNull()
+  })
+
+  it('dims the tiles from a tap until the next question chord has finished', () => {
+    useAppStore.getState().startSession()
+    renderApp(<Session />)
+    const dimmed = () =>
+      screen.getAllByTestId(/^tile-(?!grid$)/).every((t) => t.className.includes('dim'))
+    act(() => vi.advanceTimersByTime(200))
+    expect(dimmed()).toBe(true) // the first chord is sounding
+    act(() => vi.advanceTimersByTime(2600))
+    expect(dimmed()).toBe(false)
+    fireEvent.click(tile(current()))
+    expect(dimmed()).toBe(true) // feedback
+    act(() => vi.advanceTimersByTime(FEEDBACK_MS + 200))
+    expect(dimmed()).toBe(true) // next chord sounding
+    act(() => vi.advanceTimersByTime(2600))
+    expect(dimmed()).toBe(false)
   })
 
   it('hear again replays, stop ends the session', () => {

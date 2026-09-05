@@ -157,16 +157,18 @@ selectable in parent settings. There is no unlock gating in v1.
    - **Correct:** tile pops, particle burst in the chord's color, character
      bounces, ambient heat rises, the chord replays once as confirmation,
      then auto-advance once the replay has finished plus a short pause
-     (about 2.2 s in total), so the next question starts in silence. A
-     pulsing ear in the header marks the moments a question chord is
-     sounding.
+     (about 2.2 s in total), so the next question starts in silence. From
+     the tap until the next question chord has finished, every tile is
+     faded and a pulsing ear shows in the header: "listen now, answer
+     after".
    - **Wrong:** tapped tile shakes gently, the correct tile pulses and its
-     chord replays, ambient heat cools. No penalty, no sad face.
-     Auto-advance.
+     chord replays, a short falling noise sweep plays (no particles), ambient
+     heat cools. No penalty, no sad face. Auto-advance.
 6. A **Hear again** button replays the current chord at any time. Replays
    are counted but do not affect scoring.
 7. A progress trail shows identifications completed toward the session
-   target (default 20, parent-configurable 10–50).
+   target (default 20, parent-configurable 10–50), in near-equal rows of at
+   most ten dots so it never wraps unevenly.
 8. If the pacing policy fires during the session, the level-up moment
    (§6.3) runs immediately and the session then continues with the new
    chord live.
@@ -327,7 +329,7 @@ bigger than the last:
 
 | Tier | Trigger | Effect |
 |---|---|---|
-| 1 | every correct answer | particle burst in chord color from the tile, character bounce, ambient heat step |
+| 1 | every correct answer | confetti cannon in the chord's colors from just above-left of the first tile (always on screen), spraying across and cascading down, plus a small burst on the tile; character bounce; ambient heat step |
 | 2 | streak milestone (every 5, configurable) | larger burst, ★ awarded, heat ignites further, haptic |
 | 3 | session complete | session summary (§7.3): confetti + fireworks, 1–3 stars by accuracy |
 | 4 | level up | full-screen takeover (§6.3) — the biggest effect in the app |
@@ -349,8 +351,8 @@ as atmosphere rather than a gauge the child is told to watch.
   grows and pulses with heat; at 1.0 it shakes ("blazing").
 - **Flames:** from heat ≥ 0.5, flame particles lick in from the bottom edge;
   intensity scales with heat.
-- **Miss:** streak → 0; heat drains over ~1 s with a puff of steam from the
-  edges. Cooling, not punishment.
+- **Miss:** streak → 0; heat drains over ~1 s and a short falling noise
+  sweep plays. No particles. Cooling, not punishment.
 - **Sessions start cold.** Heat and streak reset at session start so every
   session offers a fresh climb; the best streak persists for parent stats.
 
@@ -358,9 +360,11 @@ as atmosphere rather than a gauge the child is told to watch.
 
 One full-screen `<canvas>` above the UI, driven by a small custom particle
 engine (object-pooled, `requestAnimationFrame`, capped particle count).
-Emitters: burst, fountain, firework (launch + trail + bloom), confetti,
-flame (continuous), steam (puff). Presets map tiers and moods to emitter
-parameters and palettes.
+Emitters: burst, cannon (directional confetti from a point), fountain,
+firework (launch + trail + bloom), confetti, flame (continuous), steam
+(puff). Presets map tiers and moods to emitter parameters and palettes. The
+canvas is sized in CSS pixels and drawn at device resolution, so effects
+land where the tiles are on any pixel density.
 
 ### 7.3 Session summary
 

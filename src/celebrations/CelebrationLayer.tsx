@@ -89,6 +89,8 @@ export function CelebrationLayer({ system }: { system?: ParticleSystem }) {
           break
         }
         case 'levelUp': {
+          // Leftover confetti from the winning trial would clutter the takeover.
+          sys.clear()
           const launch = () =>
             firework(
               sys,

@@ -183,7 +183,7 @@ describe('Session', () => {
     expect(screen.getByTestId('overtime-badge')).toBeInTheDocument()
   })
 
-  it('moves to the level-up as soon as the milestone chime ends', () => {
+  it('moves to the level-up once the milestone numeral has fallen away', () => {
     useAppStore.getState().updateSettings({
       pacingParams: { streakTarget: 3, eguchiWindow: 40, eguchiDays: 14, eguchiSessions: 10 },
     })

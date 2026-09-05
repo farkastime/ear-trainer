@@ -7,8 +7,8 @@ import { activeProfile, useAppStore } from '../../state/store'
 import { useAudio } from '../AudioContext'
 
 const REVEAL_SECONDS = 1.4
-/** One second of shaking, then the screen flashes; the character appears at peak white. Matches the CSS unlock timing. */
-export const UNLOCK_ANIM_MS = 1200
+/** Two seconds of shaking, then the screen flashes; the character appears at peak white. Matches the CSS unlock timing. */
+export const UNLOCK_ANIM_MS = 2200
 
 export function LevelUp() {
   const profile = useAppStore(activeProfile)

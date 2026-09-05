@@ -16,9 +16,10 @@ import { usePrimer } from '../hooks/usePrimer'
 // Feedback is visual plus a short sound; the chord is never replayed.
 export const FEEDBACK_CORRECT_MS = 1500
 export const FEEDBACK_WRONG_MS = 1800
-export const LEVELUP_LEAD_MS = 700
 export const QUESTION_DELAY_MS = 500
 export const MILESTONE_POP_MS = 2400
+/** A pending level-up waits for the milestone numeral to fall away before the takeover. */
+export const LEVELUP_LEAD_MS = MILESTONE_POP_MS
 const PRIMER_SECONDS = 1.2
 
 export function Session() {
@@ -99,7 +100,6 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
   useEffect(() => {
     if (session.phase !== 'feedback') return
     const last = session.answers[session.answers.length - 1]
-    // A pending level-up moves on as soon as the milestone chime ends, so the jingle follows it.
     const wait = session.pendingLevelUp
       ? LEVELUP_LEAD_MS
       : last.correct

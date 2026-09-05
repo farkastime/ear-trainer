@@ -305,13 +305,15 @@ settings (N 3–50, K 10–200, D 0–60, S 0–100).
 
 When the policy says ready, the unlock happens immediately, mid-session:
 
-1. Session input freezes; ambient heat flares to white-hot.
+1. Session input freezes; ambient heat flares to white-hot. The winning
+   trial's celebration finishes first: the milestone numeral falls away,
+   then the takeover begins and any leftover confetti is wiped.
 2. Full-screen takeover: fireworks that keep launching (one every 0.7 s) for
    as long as the screen is up, a drum fanfare and a short rising jingle
    (see §7.4).
-3. A locked tile (🔒) in the new chord's colour shakes for 1 s, then the
+3. A locked tile (🔒) in the new chord's colour shakes for 2 s, then the
    whole screen flashes white and the character is revealed with its name
-   ("Meet Owl!") at peak brightness, 1.2 s in. Nothing plays automatically: "Tap to hear it", and
+   ("Meet Owl!") at peak brightness, 2.2 s in. Nothing plays automatically: "Tap to hear it", and
    tapping the tile plays the chord. Continue is enabled once revealed.
 4. A **Continue** tap returns to the session screen with the new tile added
    in curriculum position, bouncing and glowing.

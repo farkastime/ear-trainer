@@ -61,6 +61,10 @@ export class ParticleSystem {
     this.max = n
   }
 
+  clear(): void {
+    this.particles.length = 0
+  }
+
   private range([min, max]: [number, number]): number {
     return min + (max - min) * this.rng()
   }

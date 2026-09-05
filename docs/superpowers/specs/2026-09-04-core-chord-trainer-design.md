@@ -165,11 +165,14 @@ selectable in parent settings. There is no unlock gating in v1.
      Auto-advance after 1.8 s.
    - **No three in a row:** the same chord is never asked more than twice
      consecutively.
-6. A **Hear again** button replays the current chord at any time. Replays
-   are counted but do not affect scoring.
+6. A large **Hear again** button, centred under the progress trail, replays
+   the current chord at any time. Replays are counted but do not affect
+   scoring.
 7. A progress trail shows identifications completed toward the session
    target (default 20, parent-configurable 10–50), in near-equal rows of at
-   most ten dots so it never wraps unevenly.
+   most ten dots so it never wraps unevenly. A correct answer fills its dot
+   as a green disc with a checkmark that flies in; a miss leaves a hollow
+   red ring.
 8. If the pacing policy fires during the session, the level-up moment
    (§6.3) runs immediately and the session then continues with the new
    chord live.
@@ -334,7 +337,7 @@ bigger than the last:
 | Tier | Trigger | Effect |
 |---|---|---|
 | 1 | every correct answer | one confetti cannon in the chord's colors from just above-left of the first tile (always on screen), lobbing up and right and drifting down; character bounce; ambient heat step |
-| 2 | streak milestone (every 5, configurable) | the same cannon, bigger and in rainbow colors, plus a big numeral (5, 10, 15…) that flies up and fades in about a second; ★ awarded, heat ignites further, haptic |
+| 2 | streak milestone (every 5, configurable) | the same cannon, bigger and in rainbow colors; a big numeral (5, 10, 15…) pops to the centre, lingers about a second, then falls away with the confetti; "chick, chick, ding!" (two taps and a high bell); ★ awarded, heat ignites further, haptic |
 | 3 | session complete | session summary (§7.3): confetti + fireworks, 1–3 stars by accuracy |
 | 4 | level up | full-screen takeover (§6.3) — the biggest effect in the app |
 
@@ -436,8 +439,15 @@ flames; the heat vignette still shifts color). Celebration sound has its own on/
 ## 10. Screens
 
 1. **Profile picker** — big avatar tiles, "new profile".
-2. **Home** — big Play, strip of unlocked characters (napping one shown
-   asleep), star total, gear (parent gate). Champion badge when applicable.
+2. **Home** — star total, gear (parent gate), champion badge when
+   applicable, then **Practice!**: a "My chords / All chords" toggle (saved
+   per profile) above the real tile grid. Tapping a tile plays its chord, so
+   a child can learn the sounds before being tested; this is also where a
+   child who just likes pressing the squares gets to press all of them. In
+   "All chords" the locked tiles show colour only, no character: the
+   character is earned. A napping chord is shown asleep. Big Play below the
+   grid enters the ritual and the session; stopping a session records it
+   and returns via the summary, so Home and a live session never coexist.
 3. **Get-ready** — character parade and "Listen!" cue (§5.3).
 4. **Session** — chord tiles (emoji filling half the tile), ambient heat
    vignette, listening cue, progress trail, hear-again, exit.

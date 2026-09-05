@@ -17,7 +17,7 @@ import { usePrimer } from '../hooks/usePrimer'
 export const FEEDBACK_CORRECT_MS = 1500
 export const FEEDBACK_WRONG_MS = 1800
 export const QUESTION_DELAY_MS = 500
-export const MILESTONE_POP_MS = 1200
+export const MILESTONE_POP_MS = 2400
 const PRIMER_SECONDS = 1.2
 
 export function Session() {
@@ -141,8 +141,13 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
             </span>
           )}
         </div>
+        {/* Spacer keeps the listening cue centred against the Stop button. */}
+        <div style={{ width: 48, height: 48 }} />
+      </div>
+      <ProgressTrail answers={session.answers} target={session.target} />
+      <div className="center">
         <button
-          className="icon-button"
+          className="icon-button big"
           aria-label="Hear it again"
           disabled={inputLocked}
           onClick={() =>
@@ -152,7 +157,6 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
           🔊
         </button>
       </div>
-      <ProgressTrail answers={session.answers} target={session.target} />
       {milestone !== null && (
         <div className="milestone-pop" data-testid="milestone-pop" aria-hidden="true">
           {milestone}
@@ -166,7 +170,7 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
             showLetters={settings.showLetters}
             napping={progression.napping === id}
             flash={flashFor(id)}
-            disabled={inputLocked}
+            disabled={inputLocked || progression.napping === id}
             onTap={onTap}
           />
         ))}

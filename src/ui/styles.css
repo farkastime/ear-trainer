@@ -195,6 +195,32 @@ button {
   font-size: 1.3rem;
   font-weight: 800;
 }
+.icon-button.big {
+  width: 96px;
+  height: 96px;
+  font-size: 2.8rem;
+}
+
+.segmented {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+.segmented button {
+  border: 2px solid var(--line);
+  background: var(--field);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.segmented button[aria-pressed='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
 .badge {
   display: inline-block;
   background: #5b4a1c;
@@ -278,20 +304,26 @@ button {
     0 4px 0 rgba(0, 0, 0, 0.35);
   pointer-events: none;
   z-index: 25;
-  animation: milestone 1.2s ease-out forwards;
+  animation: milestone 2.4s ease-in forwards;
 }
+/* Pop in, linger at centre, then fall away with the confetti. */
 @keyframes milestone {
   from {
     opacity: 0;
-    transform: translate(-50%, -30%) scale(0.5);
+    transform: translate(-50%, -50%) scale(0.4);
   }
-  25% {
+  12% {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1.1);
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+  18%,
+  55% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
   }
   to {
-    opacity: 0;
-    transform: translate(-50%, -130%) scale(1.4);
+    opacity: 0.7;
+    transform: translate(-50%, 140vh) rotate(22deg) scale(0.9);
   }
 }
 .tile .label {
@@ -373,14 +405,34 @@ button {
   justify-content: center;
 }
 .trail .dot {
-  width: 12px;
-  height: 12px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  border: 2px solid var(--line);
+  border: 3px solid var(--line);
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1;
+  color: #fff;
 }
 .trail .dot.correct {
   background: #66bb6a;
   border-color: #66bb6a;
+  animation: fly-in 0.5s cubic-bezier(0.2, 0.8, 0.3, 1.2) both;
+}
+.trail .dot.correct::after {
+  content: '✓';
+}
+@keyframes fly-in {
+  from {
+    transform: translateY(90px) scale(0.3);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
 }
 .trail .dot.wrong {
   border-color: #ef9a9a;

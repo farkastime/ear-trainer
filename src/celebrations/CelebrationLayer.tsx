@@ -71,7 +71,7 @@ export function CelebrationLayer({ system }: { system?: ParticleSystem }) {
         case 'streakMilestone': {
           const o = origin()
           cannon(sys, o.x, o.y, CONFETTI_COLORS, scale * 1.6)
-          if (sound) sfx.whoosh()
+          if (sound) sfx.milestone()
           vibrate([30, 50, 30], haptics)
           break
         }

@@ -1,7 +1,7 @@
 import type { SessionState } from '../core/engine/session'
 import type { Profile } from '../core/types'
 
-export const PERSIST_VERSION = 1
+export const PERSIST_VERSION = 2
 
 export interface PersistedSlice {
   profiles: Profile[]
@@ -13,8 +13,21 @@ export const EMPTY_SLICE: PersistedSlice = { profiles: [], activeProfileId: null
 
 type Migration = (state: Record<string, unknown>) => Record<string, unknown>
 
-/** Index i migrates from version i to i+1. Empty until the shape changes. */
-const MIGRATIONS: Migration[] = []
+/** Index i migrates from version i to i+1. */
+const MIGRATIONS: Migration[] = [
+  // v0 never shipped.
+  (state) => state,
+  // v1 -> v2: profiles gain the practiceAll setting.
+  (state) => {
+    const profiles = Array.isArray(state.profiles)
+      ? (state.profiles as Record<string, unknown>[]).map((p) => ({
+          ...p,
+          settings: { practiceAll: false, ...(p.settings as Record<string, unknown> | undefined) },
+        }))
+      : state.profiles
+    return { ...state, profiles }
+  },
+]
 
 function isSlice(x: unknown): x is PersistedSlice {
   if (typeof x !== 'object' || x === null) return false

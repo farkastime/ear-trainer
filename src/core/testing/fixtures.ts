@@ -31,6 +31,7 @@ export const DEFAULT_TEST_SETTINGS: ProfileSettings = {
   intensity: 'full',
   celebrationSound: true,
   haptics: true,
+  practiceAll: false,
 }
 
 export function makeProfile(

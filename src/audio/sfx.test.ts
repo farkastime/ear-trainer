@@ -112,6 +112,15 @@ describe('createToneSfx', () => {
     expect(noise.starts[2] - noise.starts[0]).toBeCloseTo(0.52)
   })
 
+  it('the milestone sound is two taps and a bell', () => {
+    const sfx = createToneSfx()
+    sfx.milestone()
+    expect(by('noise').starts).toHaveLength(2)
+    const bell = synths.filter((s) => s.kind === 'blip')[1]
+    expect(bell.starts).toHaveLength(1)
+    expect(bell.starts[0]).toBeGreaterThan(by('noise').starts[1])
+  })
+
   it('jingles play their notes in strictly increasing time on the bell synth', () => {
     const sfx = createToneSfx()
     sfx.jingleLevelUp()

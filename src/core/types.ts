@@ -48,6 +48,8 @@ export interface ProfileSettings {
   intensity: Intensity
   celebrationSound: boolean
   haptics: boolean
+  /** Practice grid on Home shows every chord (locked ones as colour only) instead of just unlocked ones. */
+  practiceAll: boolean
 }
 
 export interface Answer {

@@ -10,6 +10,7 @@ export interface Sfx {
   steam(): void
   wrong(): void
   listenCue(): void
+  milestone(): void
   fanfare(): void
   jingleLevelUp(): void
   jingleSessionEnd(): void
@@ -27,6 +28,7 @@ export function createNullSfx(): Sfx & { calls: string[] } {
     steam: rec('steam'),
     wrong: rec('wrong'),
     listenCue: rec('listenCue'),
+    milestone: rec('milestone'),
     fanfare: rec('fanfare'),
     jingleLevelUp: rec('jingleLevelUp'),
     jingleSessionEnd: rec('jingleSessionEnd'),
@@ -156,6 +158,16 @@ export function createToneSfx(): Sfx {
         noise!.triggerAttackRelease(0.06, at('noise'))
         noise!.triggerAttackRelease(0.06, at('noise', 0.26))
         noise!.triggerAttackRelease(0.12, at('noise', 0.52))
+      })
+    },
+    milestone() {
+      // "chick, chick, ding!": two taps and a high bell.
+      safely(() => {
+        filter!.frequency.value = 2500
+        noise!.envelope.decay = 0.08
+        noise!.triggerAttackRelease(0.06, at('noise'))
+        noise!.triggerAttackRelease(0.06, at('noise', 0.16))
+        bell!.triggerAttackRelease('E7', 0.5, at('bell', 0.32))
       })
     },
     jingleLevelUp() {

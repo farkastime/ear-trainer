@@ -14,6 +14,7 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
   intensity: 'full',
   celebrationSound: true,
   haptics: true,
+  practiceAll: false,
 }
 
 export function clampSettings(settings: ProfileSettings): ProfileSettings {
@@ -25,6 +26,7 @@ export function clampSettings(settings: ProfileSettings): ProfileSettings {
     ...settings,
     sessionTarget: Math.min(max, Math.max(min, Math.round(sessionTarget))),
     pacingParams: clampPacingParams(settings.pacingParams),
+    practiceAll: Boolean(settings.practiceAll),
   }
 }
 

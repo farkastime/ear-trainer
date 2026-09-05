@@ -7,8 +7,8 @@ import { activeProfile, useAppStore } from '../../state/store'
 import { useAudio } from '../AudioContext'
 
 const REVEAL_SECONDS = 1.4
-/** Two seconds of shaking, then a flash; the character appears when it ends. Matches the CSS unlock timing. */
-export const UNLOCK_ANIM_MS = 2400
+/** One second of shaking, then the screen flashes; the character appears at peak white. Matches the CSS unlock timing. */
+export const UNLOCK_ANIM_MS = 1200
 
 export function LevelUp() {
   const profile = useAppStore(activeProfile)
@@ -45,6 +45,7 @@ export function LevelUp() {
   if (!chord) return null
   return (
     <div className="overlay" data-testid="level-up" role="dialog" aria-label="New friend">
+      <div className="screen-flash" aria-hidden="true" />
       <p style={{ fontSize: '1.4rem', margin: 0 }}>New friend!</p>
       <h1 style={{ margin: 0, fontSize: '2.4rem', minHeight: '1.2em' }}>
         {revealed ? `Meet ${chord.character.name}!` : '…'}

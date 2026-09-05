@@ -14,7 +14,7 @@ it in four ways:
 
 1. Every chord has a friendly character (color + emoji, art-ready) instead of
    color alone.
-2. Being correct visibly *pops*: particle bursts, a heat meter, fireworks.
+2. Being correct visibly *pops*: particle bursts, ambient heat, fireworks.
 3. Progression is automatic and configurable, and a level-up feels like a
    power-up.
 4. Multiple nicely sampled instruments, not a single piano.
@@ -54,14 +54,15 @@ src/
       events.ts        typed domain event bus
     types.ts
   audio/               Tone.js player, sample loading, unpitched SFX
-  celebrations/        particle engine, emitters, presets, heat meter driver
+  celebrations/        particle engine, emitters, presets, ambient heat driver
   state/               Zustand store, persistence, schema migrations
   ui/                  React screens and components
 public/samples/<instrument>/   self-hosted audio samples
 ```
 
 The core emits typed events (`answered`, `streakMilestone`, `heatChanged`,
-`sessionComplete`, `levelUp`, `workingSetChanged`). Audio and celebrations
+`sessionComplete`, `levelUp`, `workingSetChanged`, `napChanged`,
+`chordWoken`). Audio and celebrations
 subscribe to events; the engine never references the DOM, canvas, or Tone.js.
 React renders from the store. This keeps progression rules — the part we will
 keep tuning — unit-testable without a browser.
@@ -144,26 +145,43 @@ selectable in parent settings. There is no unlock gating in v1.
 ## 5. Session flow
 
 1. Child taps **Play** on the profile home. First tap starts the audio
-   context (required by iOS). Samples for the active chords and chosen
-   instrument preload behind a short loading beat showing the child's
-   characters.
-2. The app plays a chord for 1.5–2.5 s (randomized).
-3. Tiles for every **unlocked** chord are shown in fixed curriculum order.
+   context (required by iOS).
+2. **Get-ready ritual** (§5.3): the child's characters parade in while
+   samples load, then a "Listen!" cue, then the first chord.
+3. The app plays a chord for 1.5–2.5 s (randomized).
+4. Tiles for every **unlocked** chord are shown in fixed curriculum order.
    Each tile shows the chord color and character emoji. Letters are off by
    default (parent toggle). Tile positions never shuffle: spatial constancy
    helps young children, as Eguchi's fixed flag set does.
-4. Child taps a tile.
+5. Child taps a tile.
    - **Correct:** tile pops, particle burst in the chord's color, character
-     bounces, heat meter rises, the chord replays once as confirmation, then
-     auto-advance after ~1 s.
+     bounces, ambient heat rises, the chord replays once as confirmation,
+     then auto-advance after ~1 s.
    - **Wrong:** tapped tile shakes gently, the correct tile pulses and its
-     chord replays, heat meter cools. No penalty, no sad face. Auto-advance.
-5. A **Hear again** button replays the current chord at any time. Replays
+     chord replays, ambient heat cools. No penalty, no sad face.
+     Auto-advance.
+6. A **Hear again** button replays the current chord at any time. Replays
    are counted but do not affect scoring.
-6. A progress trail shows identifications completed toward the session
+7. A progress trail shows identifications completed toward the session
    target (default 20, parent-configurable 10–50).
-7. On reaching the target: session summary (§7, tier 3), then back to home.
-   The child can also end early via a small exit control.
+8. If the pacing policy fires during the session, the level-up moment
+   (§6.3) runs immediately and the session then continues with the new
+   chord live.
+9. On reaching the target: **session summary** (§7.3), then home. The child
+   can also end early via a small exit control.
+
+### 5.3 Get-ready ritual
+
+Loading is a moment, not a spinner. After Play:
+
+1. The unlocked characters parade onto the screen one by one with pops.
+   Samples for the active chords and selected instrument load meanwhile.
+2. When loading is done and at least 1.5 s have passed, a "Listen!" cue
+   appears with a pulsing ear emoji and a soft unpitched whoosh.
+3. The first chord plays.
+
+If loading takes longer than 6 s the parade loops and a small "getting the
+sounds ready…" line appears; §11 covers failure.
 
 ### 5.1 Question selection
 
@@ -177,27 +195,50 @@ Each question picks one chord from the **working set** (§5.2) with weights:
 
 No spaced-repetition scheduling in v1.
 
-### 5.2 Working set and silent downgrade
+### 5.2 Recovery ladder (working set and napping)
 
-The app is expected to be used intermittently. The profile's level never
-goes down, and the tiles always show every unlocked chord, but the set of
-chords actually *drawn* can narrow so a struggling child gets easier
-questions without noticing a demotion.
+The app is expected to be used intermittently, and children regress. When a
+child struggles, the app first makes the task easier invisibly, then, if that
+is not enough, gently steps back one chord while making recovery fast.
+Recovering should feel like winning something back, never like being sent
+down.
 
-- The **working set** is always a prefix of the unlocked chords, of size
-  `w`, where `2 ≤ w ≤ unlocked.length`. Normally `w = unlocked.length`.
+**Rung 1 — working set (invisible).** The **working set** is the prefix of
+the awake chords that questions are drawn from, of size `w`, where
+`2 ≤ w ≤ awake.length`. Tiles always show every unlocked chord regardless of
+`w`.
+
+- Normally `w = awake.length`.
 - **Narrow** when accuracy over the last 8 answers of the current session
-  falls below 60% (and at least 5 answers have been given): set
+  falls below 60% (and at least 5 answers have been given):
   `w = max(2, floor(w / 2))`.
 - **Narrow at session start** if the previous session ended more than 7 days
-  ago: start with `w = max(2, ceil(unlocked.length / 2))`.
+  ago: `w = max(2, ceil(awake.length / 2))`.
 - **Widen** by one chord each time the child answers 3 in a row correctly
-  while `w < unlocked.length`.
-- The working set resets to full at the start of each session unless the
-  idle rule above applies.
+  while `w < awake.length`.
+- `w` resets to full at the start of each session unless the idle rule
+  applies.
 
-The working set is engine state, emitted via `workingSetChanged` for
-diagnostics, and shown to the parent in the stats view, never to the child.
+**Rung 2 — napping (visible, kind).** If two consecutive completed sessions
+each end below 70% accuracy, the most recently unlocked chord **takes a
+nap**: its tile stays in place but turns soft and sleepy (💤 over the
+character), it is not played, and tapping it does nothing. Effectively the
+child is practising one level down. Only one chord naps at a time; the rule
+does not fire again until the napping chord has woken.
+
+**Waking.** A streak of 5 correct on the awake set wakes the napping chord
+with a mini celebration ("Owl is awake!") and the primer sequence from
+§6.3 step 5 runs for the woken chord alone. No pacing policy check, no
+spacing wait: recovery is fast by design.
+
+**Parent controls.** Settings show a badge when a chord is napping, a
+"wake now" button, and a "rewind a level" control that removes the newest
+chord from the unlocked set entirely (for a parent who judges the child
+needs a longer step back). The stats view shows the current working set and
+nap state.
+
+Working-set and nap changes are engine state emitted via
+`workingSetChanged` and `napChanged`.
 
 ## 6. Progression and pacing
 
@@ -207,9 +248,10 @@ diagnostics, and shown to the parent in the stats view, never to the child.
 |---|---|
 | `level` | current level (§4) |
 | `unlocks` | list of `{ chordId, unlockedAt }` |
-| `streak` | current consecutive correct answers (across sessions) |
-| `bestStreak` | |
+| `streak` | current consecutive correct answers within this session; resets to 0 at session start |
+| `bestStreak` | all-time best, for parent stats |
 | `heat` | 0–1, derived from streak (§7.1); stored so it survives reload mid-session |
+| `napping` | `chordId \| null`, see §5.2 |
 | `chordStats` | per chord: `attempts`, `correct` |
 | `recentAnswers` | last 100 `{ chordId, correct, at }`; rolling window used by pacing and downgrade rules |
 | `sessions` | list of session summaries: `{ startedAt, endedAt, count, correct, levelAtStart, stars }` |
@@ -224,33 +266,42 @@ policies ship, chosen in parent settings, each with editable parameters:
 
 | Policy | Default | Ready when |
 |---|---|---|
-| **Unlimited** (default) | streak N = 10 | current streak ≥ N and every chord in the working set has been answered correctly at least once during this streak |
+| **Unlimited** (default) | streak N = 10 | current in-session streak ≥ N and every awake chord has been answered correctly at least once during this streak |
 | **Eguchi** | K = 40, D = 14 days, S = 10 sessions | accuracy over the last K answers is 100%, at least D days since the last unlock (or profile creation), and at least S sessions completed since then |
 | **Manual** | — | never automatically; the home screen shows a "ready" badge when the Unlimited rule would fire, and the parent unlocks from settings |
 
-Switching policy mid-way is safe because every policy is evaluated from
-history, not from its own state. Parameters are clamped to sane ranges in
+No policy is consulted while a chord is napping. Switching policy mid-way is
+safe because every policy is evaluated from history, not from its own
+state. Parameters are clamped to sane ranges in
 settings (N 3–50, K 10–200, D 0–60, S 0–100).
 
 ### 6.3 The level-up moment
 
 When the policy says ready, the unlock happens immediately, mid-session:
 
-1. Session input freezes; heat meter flares to maximum.
+1. Session input freezes; ambient heat flares to white-hot.
 2. Full-screen takeover: fireworks barrage, unpitched fanfare (drums,
    whoosh, cymbal).
 3. The new character is revealed with its name ("Meet Owl!"), its chord plays
    three times while the character dances. Tapping the character replays the
    chord.
-4. A **Continue** tap returns to the session with the new chord unlocked,
-   its tile added in curriculum position, and it becomes the most recently
-   unlocked chord for weighting purposes. The streak resets to 0 so the next
-   unlock is earned fresh.
+4. A **Continue** tap returns to the session screen with the new tile added
+   in curriculum position, bouncing and glowing.
+5. **Primer:** the tiles light up one at a time in curriculum order, each
+   playing its chord for ~1.2 s, ending on the new chord, which gets the
+   biggest bounce and a second play. This re-anchors the whole set before
+   the child is asked to discriminate within it. Input stays frozen until
+   the primer ends.
+6. The session resumes. The new chord becomes the most recently unlocked
+   chord for weighting; the streak resets to 0 so the next unlock is earned
+   fresh.
 
-### 6.4 No demotion
+### 6.4 Stepping back
 
-Level never decreases automatically. The parent can reset a profile to any
-level from settings. Intermittent-use handling is the working set (§5.2).
+Automatic step-back is limited to napping the newest chord (§5.2), which
+is always recoverable within one good session. The unlock record and level
+are unchanged by a nap. Only a parent can remove a chord from the unlocked
+set ("rewind a level") or reset a profile.
 
 ### 6.5 Grand champion
 
@@ -266,25 +317,32 @@ bigger than the last:
 
 | Tier | Trigger | Effect |
 |---|---|---|
-| 1 | every correct answer | particle burst in chord color from the tile, character bounce, heat meter step |
-| 2 | streak milestone (every 5, configurable) | larger burst, ★ awarded, heat meter ignites further, haptic |
-| 3 | session complete | confetti + fireworks, 1–3 stars by accuracy (≥95% → 3, ≥80% → 2, else 1), summary card |
+| 1 | every correct answer | particle burst in chord color from the tile, character bounce, ambient heat step |
+| 2 | streak milestone (every 5, configurable) | larger burst, ★ awarded, heat ignites further, haptic |
+| 3 | session complete | session summary (§7.3): confetti + fireworks, 1–3 stars by accuracy |
 | 4 | level up | full-screen takeover (§6.3) — the biggest effect in the app |
 
-### 7.1 Heat meter
+Waking a napping chord (§5.2) sits between tiers 2 and 3.
 
-A persistent meter on the session screen that builds with the streak, in the
-spirit of Balatro's score fire.
+### 7.1 Ambient heat
 
-- `heat = min(1, streak / 15)` with easing; the meter is a vertical bar or
-  ring that fills and shifts from amber through orange to white-hot.
-- From heat ≥ 0.33 a continuous flame emitter runs along the meter; at
-  ≥ 0.66 the streak counter pulses and the screen edges glow; at 1.0 the
-  counter shakes and flames intensify ("blazing").
-- On a miss: streak → 0 and heat drains over ~1 s with a puff of steam
-  particles. Cooling, not punishment.
-- Heat persists across sessions with the streak so a child who ended hot
-  starts hot.
+There is no meter object. The streak heats the *room*: the session screen
+itself changes, in the spirit of Balatro's score fire, so the effect reads
+as atmosphere rather than a gauge the child is told to watch.
+
+- `heat = min(1, streak / 15)` with easing.
+- **Edges:** a vignette around the screen edge shifts from neutral through
+  amber and orange to white-hot as heat rises.
+- **Tiles:** pick up a glow in the same palette; the just-answered tile
+  glows strongest.
+- **Streak number:** hidden below 3; from 3 it appears in the header and
+  grows and pulses with heat; at 1.0 it shakes ("blazing").
+- **Flames:** from heat ≥ 0.5, flame particles lick in from the bottom edge;
+  intensity scales with heat.
+- **Miss:** streak → 0; heat drains over ~1 s with a puff of steam from the
+  edges. Cooling, not punishment.
+- **Sessions start cold.** Heat and streak reset at session start so every
+  session offers a fresh climb; the best streak persists for parent stats.
 
 ### 7.2 Celebration layer
 
@@ -294,18 +352,26 @@ Emitters: burst, fountain, firework (launch + trail + bloom), confetti,
 flame (continuous), steam (puff). Presets map tiers and moods to emitter
 parameters and palettes.
 
-### 7.3 Sound and haptics
+### 7.3 Session summary
+
+The end-of-session screen is a celebration, not a scoreboard. Confetti and
+fireworks, stars fly in one at a time (≥95% → 3, ≥80% → 2, else 1), the
+awake characters cheer, and a short line of encouragement appears. Accuracy
+and count are shown small. Buttons: **Play again**, **Home**. If a level-up
+happened in this session the new character is featured on the card.
+
+### 7.4 Sound and haptics
 
 Celebration sounds are **unpitched** by default (whoosh, pop, drum,
 cymbal): extra tones must not muddy the pitch exposure the app exists to
 deliver. The only pitched sound in any celebration is the chord itself.
 Haptics via `navigator.vibrate` where supported.
 
-### 7.4 Intensity and accessibility
+### 7.5 Intensity and accessibility
 
 Parent setting: celebration intensity `full` | `medium` | `calm`.
-`prefers-reduced-motion` forces `calm` (no screen shake, sparse particles,
-no continuous flame). Celebration sound has its own on/off toggle.
+`prefers-reduced-motion` forces `calm` (no shake, sparse particles, no
+flames; the heat vignette still shifts color). Celebration sound has its own on/off toggle.
 
 ## 8. Audio
 
@@ -318,8 +384,9 @@ no continuous flame). Celebration sound has its own on/off toggle.
   in `THIRD_PARTY_NOTICES.md`.
 - Chord playback: all notes triggered simultaneously at fixed velocity for
   the randomized duration; release per instrument.
-- Preload only the notes the active chords need for the selected
-  instrument. Additional notes load when a chord unlocks.
+- Preload only the notes the awake chords need for the selected
+  instrument, during the get-ready ritual (§5.3). Notes for a newly
+  unlocked chord load during the level-up takeover.
 - Service worker precaches the app shell and runtime-caches sample files,
   so the PWA works offline after first use.
 - The audio context starts on the first Play tap and resumes on the next tap
@@ -336,20 +403,22 @@ no continuous flame). Celebration sound has its own on/off toggle.
   haptics.
 - **Parent gate:** a single-digit multiplication question (e.g. "7 × 8 = ?")
   guards the gear icon. Behind it: settings, stats (per-chord accuracy bars,
-  recent sessions, current working set), manual unlock / level reset,
-  profile delete, and JSON export/import of a profile so a family can move
-  devices without a backend.
+  recent sessions, best streak, current working set and nap state), manual
+  unlock, wake now, rewind a level, level reset, profile delete, and JSON
+  export/import of a profile so a family can move devices without a
+  backend.
 
 ## 10. Screens
 
 1. **Profile picker** — big avatar tiles, "new profile".
-2. **Home** — big Play, strip of unlocked characters, star total, streak /
-   heat glimpse, gear (parent gate). Champion badge when applicable.
-3. **Session** — chord tiles, heat meter, streak counter, progress trail,
-   hear-again, exit.
-4. **Level-up takeover** — overlay (§6.3).
-5. **Session summary** — stars, accuracy, "play again" / home.
-6. **Parent settings** — §9.
+2. **Home** — big Play, strip of unlocked characters (napping one shown
+   asleep), star total, gear (parent gate). Champion badge when applicable.
+3. **Get-ready** — character parade and "Listen!" cue (§5.3).
+4. **Session** — chord tiles, ambient heat vignette, streak number in the
+   header, progress trail, hear-again, exit.
+5. **Level-up takeover** — overlay and primer (§6.3).
+6. **Session summary** — §7.3.
+7. **Parent settings** — §9.
 
 Portrait phone first; tablet and desktop layouts widen the tile grid. Tile
 grid is 2 columns up to 4 chords, 3 columns up to 9, 4 columns beyond.
@@ -368,11 +437,12 @@ grid is 2 columns up to 4 chords, 3 columns up to 9, 4 columns beyond.
 
 - **Vitest (core):** pacing policies against synthetic histories and a fake
   clock (Unlimited streak rule; Eguchi accuracy, spacing, and session gates;
-  Manual never fires); selection weighting distributions; working-set
-  narrow/widen rules including the idle rule; streak, heat, and star
-  bookkeeping; store migrations.
-- **React Testing Library:** parent gate, tile-tap answer flow, level-up
-  overlay renders on `levelUp`.
+  Manual never fires); selection weighting distributions; recovery ladder
+  (working-set narrow/widen including the idle rule, nap trigger after two
+  weak sessions, wake on streak of 5, policy suppressed while napping);
+  per-session streak and heat reset; star bookkeeping; store migrations.
+- **React Testing Library:** parent gate, tile-tap answer flow, napping
+  tile is inert, level-up overlay and primer sequence render on `levelUp`.
 - **Playwright:** one smoke test running a full session with audio stubbed
   and the celebration canvas present.
 - **CI:** GitHub Actions runs typecheck, lint, unit tests, and build on every

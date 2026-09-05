@@ -1,4 +1,4 @@
-import { fireEvent, screen } from '@testing-library/react'
+import { act, fireEvent, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { activeProfile, useAppStore } from '../../state/store'
 import { renderApp, resetStore } from '../testing'
@@ -46,12 +46,14 @@ describe('ParentSettings', () => {
     passGate()
     fireEvent.click(screen.getByRole('button', { name: /unlock next/i }))
     expect(activeProfile(useAppStore.getState())!.progression.unlocks).toHaveLength(3)
-    useAppStore.setState((st) => ({
-      profiles: st.profiles.map((p) => ({
-        ...p,
-        progression: { ...p.progression, napping: 'blue' },
-      })),
-    }))
+    act(() => {
+      useAppStore.setState((st) => ({
+        profiles: st.profiles.map((p) => ({
+          ...p,
+          progression: { ...p.progression, napping: 'blue' },
+        })),
+      }))
+    })
     expect(screen.getByText(/whale is napping/i)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /wake now/i }))
     expect(activeProfile(useAppStore.getState())!.progression.napping).toBeNull()

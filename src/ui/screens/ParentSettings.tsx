@@ -305,7 +305,7 @@ function SettingsBody() {
                   importProfile(await f.text())
                   setImportError(null)
                 } catch {
-                  setImportError("That file isn't an Ear Trainer profile.")
+                  setImportError("That file isn't an EarBuddies profile.")
                 }
               }}
             />

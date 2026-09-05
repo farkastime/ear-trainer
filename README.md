@@ -1,4 +1,4 @@
-# Ear Trainer
+# EarBuddies
 
 A mobile-first PWA that teaches young children to identify chords by ear
 (Eguchi Chord Identification Method), with characters, celebrations, and

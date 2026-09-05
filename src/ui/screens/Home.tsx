@@ -5,6 +5,7 @@ import { DEFAULT_CURRICULUM, isChampion, unlockedChordIds } from '../../core/con
 import { DEFAULT_INSTRUMENT_ID, instrumentById } from '../../core/content/instruments'
 import { activeProfile, useAppStore } from '../../state/store'
 import { useAudio } from '../AudioContext'
+import { AppHeader } from '../components/AppHeader'
 import { ChordTile } from '../components/ChordTile'
 import { TileGrid } from '../components/TileGrid'
 
@@ -53,6 +54,7 @@ export function Home() {
 
   return (
     <div className="screen" data-screen="home" data-testid="screen-home">
+      <AppHeader />
       <div className="row">
         <button
           className="icon-button"

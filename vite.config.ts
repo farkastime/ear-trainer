@@ -8,8 +8,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Ear Trainer',
-        short_name: 'Ear Trainer',
+        name: 'EarBuddies',
+        short_name: 'EarBuddies',
         description: 'Chord ear training for young children',
         theme_color: '#262231',
         background_color: '#262231',

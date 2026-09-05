@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
-import { awakeChordIds, nextChordId } from '../core/content/curriculum'
+import { nextChordId } from '../core/content/curriculum'
 import type { EngineEvent } from '../core/engine/events'
 import type { Rng } from '../core/engine/rng'
 import * as engine from '../core/engine/session'
@@ -162,15 +162,10 @@ export function createAppStore(deps: StoreDeps) {
             }
           },
 
-          continueAfterLevelUp: () => {
+          continueAfterLevelUp: () =>
             apply((profile, session) =>
               session ? engine.continueAfterLevelUp(profile, session, engineDeps()) : null,
-            )
-            const profile = activeProfile(get())
-            if (profile && get().session?.phase === 'question') {
-              write({ pendingPrimer: awakeChordIds(profile.progression) })
-            }
-          },
+            ),
 
           endSession: () =>
             apply((profile, session) =>

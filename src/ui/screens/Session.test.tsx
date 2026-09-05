@@ -3,7 +3,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { chordById } from '../../core/content/chords'
 import { activeProfile, useAppStore } from '../../state/store'
 import { renderApp, resetStore } from '../testing'
-import { CONFIRM_SECONDS, FEEDBACK_MS, Session } from './Session'
+import {
+  CONFIRM_SECONDS,
+  FEEDBACK_CORRECT_MS,
+  FEEDBACK_WRONG_MS,
+  QUESTION_DELAY_MS,
+  Session,
+} from './Session'
 
 beforeEach(() => {
   vi.useFakeTimers()
@@ -14,6 +20,11 @@ afterEach(() => vi.useRealTimers())
 
 const current = () => useAppStore.getState().session!.currentChordId!
 const tile = (id: string) => screen.getByTestId(`tile-${id}`)
+const other = () => (current() === 'red' ? 'yellow' : 'red')
+// Past the question delay, so the question chord has been played.
+const AFTER_QUESTION_MS = QUESTION_DELAY_MS + 100
+// Longest question chord (2.5 s) plus the delay before it.
+const CHORD_DONE_MS = QUESTION_DELAY_MS + 2600
 
 describe('Session', () => {
   it('renders unlocked tiles in curriculum order and plays the question', () => {
@@ -24,45 +35,52 @@ describe('Session', () => {
     expect(tiles.map((t) => t.dataset.chord)).toEqual(['red', 'yellow', 'blue'])
     expect(tile('red')).toHaveStyle({ '--tile-color': '#e53935' })
     expect(screen.getByTestId('tile-grid').dataset.cols).toBe('2')
-    act(() => vi.advanceTimersByTime(200))
+    act(() => vi.advanceTimersByTime(AFTER_QUESTION_MS))
     const player = services.player as unknown as { played: { notes: string[] }[] }
     expect(player.played[0].notes).toEqual(chordById(current()).notes)
   })
 
-  it('a correct tap pops, replays the chord, then advances', () => {
+  it('a correct tap pops without a replay, then advances after the correct-feedback pause', () => {
     useAppStore.getState().startSession()
     const { services } = renderApp(<Session />)
-    act(() => vi.advanceTimersByTime(200))
+    act(() => vi.advanceTimersByTime(AFTER_QUESTION_MS))
     const asked = current()
     fireEvent.click(tile(asked))
     expect(useAppStore.getState().session!.phase).toBe('feedback')
     expect(tile(asked).className).toMatch(/pop/)
     const player = services.player as unknown as { played: { notes: string[] }[] }
-    expect(player.played).toHaveLength(2)
-    act(() => vi.advanceTimersByTime(FEEDBACK_MS))
+    expect(player.played).toHaveLength(1)
+    act(() => vi.advanceTimersByTime(FEEDBACK_CORRECT_MS - 1))
+    expect(useAppStore.getState().session!.phase).toBe('feedback')
+    act(() => vi.advanceTimersByTime(1))
     expect(useAppStore.getState().session!.phase).toBe('question')
     expect(useAppStore.getState().session!.answers).toHaveLength(1)
   })
 
-  it('a wrong tap shakes the tapped tile and pulses the right one', () => {
+  it('a wrong tap shakes the tapped tile, pulses and replays the right one, then waits out the replay', () => {
     useAppStore.getState().startSession()
-    renderApp(<Session />)
+    const { services } = renderApp(<Session />)
+    act(() => vi.advanceTimersByTime(AFTER_QUESTION_MS))
     const asked = current()
-    const wrong = asked === 'red' ? 'yellow' : 'red'
+    const wrong = other()
     fireEvent.click(tile(wrong))
     expect(tile(wrong).className).toMatch(/shake/)
     expect(tile(asked).className).toMatch(/pulse/)
-    act(() => vi.advanceTimersByTime(FEEDBACK_MS + 500))
+    const player = services.player as unknown as { played: { notes: string[] }[] }
+    expect(player.played).toHaveLength(2)
+    expect(player.played[1].notes).toEqual(chordById(asked).notes)
+    act(() => vi.advanceTimersByTime(CONFIRM_SECONDS * 1000))
+    expect(useAppStore.getState().session!.phase).toBe('feedback')
+    act(() => vi.advanceTimersByTime(FEEDBACK_WRONG_MS - CONFIRM_SECONDS * 1000))
     expect(useAppStore.getState().session!.phase).toBe('question')
+    expect(FEEDBACK_WRONG_MS).toBeGreaterThanOrEqual(CONFIRM_SECONDS * 1000 + 500)
   })
 
   it('does not carry a shake target over to the next question', () => {
     useAppStore.getState().startSession()
     renderApp(<Session />)
-    const firstAsked = current()
-    const wrong = firstAsked === 'red' ? 'yellow' : 'red'
-    fireEvent.click(tile(wrong))
-    act(() => vi.advanceTimersByTime(FEEDBACK_MS + 500))
+    fireEvent.click(tile(other()))
+    act(() => vi.advanceTimersByTime(FEEDBACK_WRONG_MS))
     const secondAsked = current()
     fireEvent.click(tile(secondAsked))
     expect(
@@ -90,52 +108,22 @@ describe('Session', () => {
     expect(useAppStore.getState().session!.answers).toHaveLength(1)
   })
 
-  it('waits for the confirmation replay to finish, plus a pause, before the next question', () => {
-    useAppStore.getState().startSession()
-    renderApp(<Session />)
-    act(() => vi.advanceTimersByTime(200))
-    fireEvent.click(tile(current()))
-    expect(useAppStore.getState().session!.phase).toBe('feedback')
-    act(() => vi.advanceTimersByTime(CONFIRM_SECONDS * 1000))
-    expect(useAppStore.getState().session!.phase).toBe('feedback')
-    act(() => vi.advanceTimersByTime(FEEDBACK_MS - CONFIRM_SECONDS * 1000))
-    expect(useAppStore.getState().session!.phase).toBe('question')
-    expect(FEEDBACK_MS).toBeGreaterThanOrEqual(CONFIRM_SECONDS * 1000 + 500)
-  })
-
-  it('shows a listening cue while the question chord plays, and not during feedback', () => {
+  it('shows a listening cue from the question until its chord has finished', () => {
     useAppStore.getState().startSession()
     renderApp(<Session />)
     expect(screen.getByTestId('listening')).toBeInTheDocument()
-    act(() => vi.advanceTimersByTime(200))
+    act(() => vi.advanceTimersByTime(AFTER_QUESTION_MS))
     expect(screen.getByTestId('listening')).toBeInTheDocument()
-    act(() => vi.advanceTimersByTime(2600))
+    act(() => vi.advanceTimersByTime(CHORD_DONE_MS))
     expect(screen.queryByTestId('listening')).toBeNull()
     fireEvent.click(tile(current()))
     expect(screen.queryByTestId('listening')).toBeNull()
-  })
-
-  it('dims the tiles from a tap until the next question chord has finished', () => {
-    useAppStore.getState().startSession()
-    renderApp(<Session />)
-    const dimmed = () =>
-      screen.getAllByTestId(/^tile-(?!grid$)/).every((t) => t.className.includes('dim'))
-    act(() => vi.advanceTimersByTime(200))
-    expect(dimmed()).toBe(true) // the first chord is sounding
-    act(() => vi.advanceTimersByTime(2600))
-    expect(dimmed()).toBe(false)
-    fireEvent.click(tile(current()))
-    expect(dimmed()).toBe(true) // feedback
-    act(() => vi.advanceTimersByTime(FEEDBACK_MS + 200))
-    expect(dimmed()).toBe(true) // next chord sounding
-    act(() => vi.advanceTimersByTime(2600))
-    expect(dimmed()).toBe(false)
   })
 
   it('hear again replays, stop ends the session', () => {
     useAppStore.getState().startSession()
     const { services } = renderApp(<Session />)
-    act(() => vi.advanceTimersByTime(200))
+    act(() => vi.advanceTimersByTime(AFTER_QUESTION_MS))
     fireEvent.click(screen.getByRole('button', { name: /hear it again/i }))
     expect((services.player as unknown as { played: unknown[] }).played).toHaveLength(2)
     fireEvent.click(screen.getByRole('button', { name: /stop/i }))
@@ -149,7 +137,7 @@ describe('Session', () => {
     expect(screen.queryByTestId('streak-badge')).toBeNull()
     for (let i = 0; i < 3; i++) {
       fireEvent.click(tile(current()))
-      act(() => vi.advanceTimersByTime(FEEDBACK_MS))
+      act(() => vi.advanceTimersByTime(FEEDBACK_CORRECT_MS))
     }
     expect(screen.getByTestId('streak-badge').textContent).toContain('3')
     expect(

@@ -88,7 +88,7 @@ describe('session actions', () => {
     off()
   })
 
-  it('queues the primer after a level-up and clears it', () => {
+  it('does not run a primer after a level-up', () => {
     const { store } = makeStore()
     store.getState().createProfile('Ada', '🐱')
     store.getState().updateSettings({
@@ -103,10 +103,8 @@ describe('session actions', () => {
     }
     expect(store.getState().session?.phase).toBe('levelUp')
     store.getState().continueAfterLevelUp()
-    expect(store.getState().pendingPrimer).toEqual(['red', 'yellow', 'blue'])
-    expect(store.getState().session?.phase).toBe('question')
-    store.getState().clearPrimer()
     expect(store.getState().pendingPrimer).toBeNull()
+    expect(store.getState().session?.phase).toBe('question')
   })
 
   it('queues the wake primer until after the feedback for the waking answer', () => {

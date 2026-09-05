@@ -50,10 +50,13 @@ vi.mock('tone', () => {
   class MembraneSynth extends Pitched {
     kind = 'drum'
   }
+  class Synth extends Pitched {
+    kind = 'blip'
+  }
   class Filter extends FakeSynth {
     kind = 'filter'
   }
-  return { NoiseSynth, MetalSynth, MembraneSynth, Filter, now: () => now.value }
+  return { NoiseSynth, MetalSynth, MembraneSynth, Synth, Filter, now: () => now.value }
 })
 
 import { createToneSfx } from './sfx'
@@ -91,12 +94,14 @@ describe('createToneSfx', () => {
     expect(by('metal').starts).toHaveLength(2)
   })
 
-  it('wrong is a single descending noise sweep on the noise synth', () => {
+  it('wrong is a descending two-tone blip on its own synth', () => {
     const sfx = createToneSfx()
     sfx.wrong()
-    expect(by('noise').starts).toHaveLength(1)
+    const blip = by('blip')
+    expect(blip.starts).toHaveLength(2)
+    expect(blip.starts[1]).toBeGreaterThan(blip.starts[0])
+    expect(by('noise').starts).toHaveLength(0)
     expect(by('drum').starts).toHaveLength(0)
-    expect(by('metal').starts).toHaveLength(0)
   })
 
   it('later real time wins over the monotonic floor', () => {

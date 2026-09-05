@@ -44,7 +44,7 @@ test('a child can complete a session and level up', async ({ page }) => {
     if (s.phase === 'levelUp') {
       leveledUp = true
       await page.getByRole('button', { name: 'Continue' }).click()
-      await page.waitForTimeout(5000) // primer for three chords
+      await page.waitForTimeout(500)
       continue
     }
     if (s.phase !== 'question' || !s.current) {

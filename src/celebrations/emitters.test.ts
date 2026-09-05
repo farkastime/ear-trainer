@@ -50,13 +50,15 @@ describe('emitters', () => {
     expect(hot.particles.every((p) => p.y >= 800 - 5 && p.vy < 0)).toBe(true)
   })
 
-  it('cannon sprays confetti rightward from its origin and it falls', () => {
+  it('cannon lobs confetti up and to the right from its origin, slowly enough to fall on screen', () => {
     const s = sys()
     cannon(s, 20, 100, ['#f0f'], 1)
     expect(s.count).toBeGreaterThan(20)
     expect(s.particles.every((p) => p.x === 20 && p.y === 100)).toBe(true)
-    expect(s.particles.every((p) => p.vx > 0)).toBe(true)
-    expect(s.particles.every((p) => p.gravity > 0)).toBe(true)
+    expect(s.particles.every((p) => p.vx > 0 && p.vy < 0)).toBe(true)
+    expect(s.particles.every((p) => p.gravity > 0 && p.life >= 2.8)).toBe(true)
+    // Peak horizontal speed stays modest so pieces do not exit stage right.
+    expect(Math.max(...s.particles.map((p) => p.vx))).toBeLessThan(400)
     const calm = sys()
     cannon(calm, 20, 100, ['#f0f'], 0.25)
     expect(calm.count).toBeLessThan(s.count)

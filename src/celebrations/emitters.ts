@@ -82,7 +82,7 @@ export function firework(
   })
 }
 
-/** Confetti cannon: sprays rightward and slightly upward from one point, then falls. */
+/** Confetti cannon: lobs pieces up and to the right from one point; they drift and fall slowly. */
 export function cannon(
   sys: ParticleSystem,
   x: number,
@@ -94,13 +94,13 @@ export function cannon(
     x,
     y,
     count: Math.round(60 * scale),
-    speed: [350, 750],
-    angle: [-0.55, 0.35],
-    life: [1.4, 2.4],
+    speed: [180, 420],
+    angle: [-1.35, -0.55],
+    life: [2.8, 4.2],
     size: [4, 8],
     colors,
-    gravity: 650,
-    drag: 1.1,
+    gravity: 220,
+    drag: 1.4,
     shape: 'rect',
   })
 }

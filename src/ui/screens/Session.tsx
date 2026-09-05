@@ -13,10 +13,12 @@ import { StreakBadge } from '../components/StreakBadge'
 import { TileGrid } from '../components/TileGrid'
 import { usePrimer } from '../hooks/usePrimer'
 
-// Feedback must outlast the confirmation replay so the next question starts in silence.
+// A correct answer is confirmed visually only; a miss replays the chord while the
+// right tile pulses, and its feedback must outlast that replay.
 export const CONFIRM_SECONDS = 1.5
-export const FEEDBACK_MS = CONFIRM_SECONDS * 1000 + 700
-const QUESTION_DELAY_MS = 150
+export const FEEDBACK_CORRECT_MS = 1500
+export const FEEDBACK_WRONG_MS = CONFIRM_SECONDS * 1000 + 700
+export const QUESTION_DELAY_MS = 500
 const PRIMER_SECONDS = 1.2
 
 export function Session() {
@@ -62,8 +64,7 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
   useEffect(() => {
     if (session.phase !== 'question' || !session.currentChordId || pendingPrimer) return
     const id = session.currentChordId
-    // Listening starts with the question, not the chord, so tiles stay dimmed
-    // through the short delay before playback.
+    // The cue starts with the question, not the chord, so there is no gap before playback.
     setListening(true)
     let done: ReturnType<typeof setTimeout> | undefined
     const t = setTimeout(() => {
@@ -82,8 +83,8 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
   useEffect(() => {
     if (session.phase !== 'feedback') return
     const last = session.answers[session.answers.length - 1]
-    play(last.chordId, CONFIRM_SECONDS)
-    const t = setTimeout(advance, last.correct ? FEEDBACK_MS : FEEDBACK_MS + 500)
+    if (!last.correct) play(last.chordId, CONFIRM_SECONDS)
+    const t = setTimeout(advance, last.correct ? FEEDBACK_CORRECT_MS : FEEDBACK_WRONG_MS)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session.phase, session.answers.length])
@@ -148,7 +149,6 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
             napping={progression.napping === id}
             flash={flashFor(id)}
             disabled={inputLocked}
-            dimmed={session.phase !== 'question' || listening}
             onTap={onTap}
           />
         ))}

@@ -31,6 +31,7 @@ export function createToneSfx(): Sfx {
   let noise: Tone.NoiseSynth | null = null
   let metal: Tone.MetalSynth | null = null
   let drum: Tone.MembraneSynth | null = null
+  let blip: Tone.Synth | null = null
   let filter: Tone.Filter | null = null
   const lastStart: Record<string, number> = {}
 
@@ -54,6 +55,11 @@ export function createToneSfx(): Sfx {
       envelope: { attack: 0.001, decay: 0.3, sustain: 0 },
     }).toDestination()
     drum.volume.value = -6
+    blip = new Tone.Synth({
+      oscillator: { type: 'triangle' },
+      envelope: { attack: 0.01, decay: 0.15, sustain: 0.4, release: 0.15 },
+    }).toDestination()
+    blip.volume.value = -10
   }
 
   // Tone sources throw if started at or before their previous start time, so
@@ -103,12 +109,11 @@ export function createToneSfx(): Sfx {
       })
     },
     wrong() {
-      // A falling noise sweep reads as "not quite" without adding a pitch to the lesson.
+      // A descending two-tone "bee-oop". Pitched, deliberately: it sits an octave
+      // below the chord vocabulary (lowest chord note A3) so it never reads as a chord.
       safely(() => {
-        filter!.frequency.value = 1400
-        filter!.frequency.rampTo(250, 0.45)
-        noise!.envelope.decay = 0.5
-        noise!.triggerAttackRelease(0.45, at('noise'))
+        blip!.triggerAttackRelease('E3', 0.18, at('blip'))
+        blip!.triggerAttackRelease('A2', 0.35, at('blip', 0.2))
       })
     },
     fanfare() {

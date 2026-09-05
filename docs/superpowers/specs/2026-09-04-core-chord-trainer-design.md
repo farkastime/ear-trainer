@@ -154,16 +154,15 @@ selectable in parent settings. There is no unlock gating in v1.
    default (parent toggle). Tile positions never shuffle: spatial constancy
    helps young children, as Eguchi's fixed flag set does.
 5. Child taps a tile.
-   - **Correct:** tile pops, particle burst in the chord's color, character
-     bounces, ambient heat rises, the chord replays once as confirmation,
-     then auto-advance once the replay has finished plus a short pause
-     (about 2.2 s in total), so the next question starts in silence. From
-     the tap until the next question chord has finished, every tile is
-     faded and a pulsing ear shows in the header: "listen now, answer
-     after".
-   - **Wrong:** tapped tile shakes gently, the correct tile pulses and its
-     chord replays, a short falling noise sweep plays (no particles), ambient
-     heat cools. No penalty, no sad face. Auto-advance.
+   - **Correct:** tile pops, confetti in the chord's color, character
+     bounces, ambient heat rises. No replay: the celebration is the
+     confirmation. Auto-advance after 1.5 s, then a 0.5 s beat of silence
+     before the next chord. A pulsing ear shows in the header from the
+     moment a question begins until its chord has finished.
+   - **Wrong:** tapped tile shakes gently, a descending two-tone "bee-oop"
+     plays, then the correct tile pulses while its chord replays (the
+     learning moment), ambient heat cools. No penalty, no sad face.
+     Auto-advance once the replay has finished plus a short pause.
 6. A **Hear again** button replays the current chord at any time. Replays
    are counted but do not affect scoring.
 7. A progress trail shows identifications completed toward the session
@@ -239,9 +238,10 @@ child is practising one level down. Only one chord naps at a time; the rule
 does not fire again until the napping chord has woken.
 
 **Waking.** A streak of 5 correct on the awake set wakes the napping chord
-with a mini celebration ("Owl is awake!") and the primer sequence from
-§6.3 step 5 runs for the woken chord alone. No pacing policy check, no
-spacing wait: recovery is fast by design.
+with a mini celebration ("Owl is awake!") and a short primer for the woken
+chord alone: its tile lights up and its chord plays twice before the next
+question. No pacing policy check, no spacing wait: recovery is fast by
+design.
 
 **Parent controls.** Settings show a badge when a chord is napping, a
 "wake now" button, and a "rewind a level" control that removes the newest
@@ -295,18 +295,14 @@ When the policy says ready, the unlock happens immediately, mid-session:
 2. Full-screen takeover: fireworks barrage, unpitched fanfare (drums,
    whoosh, cymbal).
 3. The new character is revealed with its name ("Meet Owl!"), its chord plays
-   three times while the character dances. Tapping the character replays the
-   chord.
+   three times in quick succession (1.1 s apart, overlapping slightly) while
+   the character dances. Tapping the character replays the chord.
 4. A **Continue** tap returns to the session screen with the new tile added
    in curriculum position, bouncing and glowing.
-5. **Primer:** the tiles light up one at a time in curriculum order, each
-   playing its chord for ~1.2 s, ending on the new chord, which gets the
-   biggest bounce and a second play. This re-anchors the whole set before
-   the child is asked to discriminate within it. Input stays frozen until
-   the primer ends.
-6. The session resumes. The new chord becomes the most recently unlocked
-   chord for weighting; the streak resets to 0 so the next unlock is earned
-   fresh.
+5. The session resumes at once; there is no run-through of the whole set,
+   which added noise without adding clarity. The new chord becomes the most
+   recently unlocked chord for weighting; the streak resets to 0 so the next
+   unlock is earned fresh.
 
 ### 6.4 Stepping back
 
@@ -351,8 +347,8 @@ as atmosphere rather than a gauge the child is told to watch.
   grows and pulses with heat; at 1.0 it shakes ("blazing").
 - **Flames:** from heat ≥ 0.5, flame particles lick in from the bottom edge;
   intensity scales with heat.
-- **Miss:** streak → 0; heat drains over ~1 s and a short falling noise
-  sweep plays. No particles. Cooling, not punishment.
+- **Miss:** streak → 0; heat drains over ~1 s and the two-tone "bee-oop"
+  plays. No particles. Cooling, not punishment.
 - **Sessions start cold.** Heat and streak reset at session start so every
   session offers a fresh climb; the best streak persists for parent stats.
 
@@ -378,7 +374,9 @@ happened in this session the new character is featured on the card.
 
 Celebration sounds are **unpitched** by default (whoosh, pop, drum,
 cymbal): extra tones must not muddy the pitch exposure the app exists to
-deliver. The only pitched sound in any celebration is the chord itself.
+deliver. Two exceptions: the chord itself, and the miss "bee-oop", a
+descending two-tone blip kept an octave below the chord vocabulary so it
+cannot be mistaken for a chord.
 Haptics via `navigator.vibrate` where supported.
 
 ### 7.5 Intensity and accessibility

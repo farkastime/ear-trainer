@@ -23,7 +23,7 @@ beforeEach(() => {
 afterEach(() => vi.useRealTimers())
 
 describe('LevelUp', () => {
-  it('reveals the new character, plays its chord three times, and continues with a primer', async () => {
+  it('reveals the new character, plays its chord three times, and continues without a primer', async () => {
     expect(useAppStore.getState().session?.phase).toBe('levelUp')
     const player = createNullPlayer()
     const sfx = createNullSfx()
@@ -38,7 +38,7 @@ describe('LevelUp', () => {
     expect(player.played).toHaveLength(4)
     fireEvent.click(screen.getByRole('button', { name: /continue/i }))
     expect(useAppStore.getState().session?.phase).toBe('question')
-    expect(useAppStore.getState().pendingPrimer).toEqual(['red', 'yellow', 'blue'])
+    expect(useAppStore.getState().pendingPrimer).toBeNull()
   })
 
   it('loads the new chord samples for the profile instrument before playing', async () => {

@@ -6,7 +6,8 @@ import { DEFAULT_INSTRUMENT_ID, instrumentById } from '../../core/content/instru
 import { activeProfile, useAppStore } from '../../state/store'
 import { useAudio } from '../AudioContext'
 
-const PLAYS = [0, 1500, 3000]
+// Three plays that overlap slightly, so the reveal feels like one gesture.
+const PLAYS = [0, 1100, 2200]
 const REVEAL_SECONDS = 1.4
 
 export function LevelUp() {

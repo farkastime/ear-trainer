@@ -107,15 +107,13 @@ describe('Session', () => {
     expect(useAppStore.getState().session!.answers).toHaveLength(1)
   })
 
-  it('shows a listening cue from the question until its chord has finished', () => {
+  it('throbs the hear-again button while the question chord plays', () => {
     useAppStore.getState().startSession()
     renderApp(<Session />)
-    expect(screen.getByTestId('listening')).toBeInTheDocument()
     act(() => vi.advanceTimersByTime(AFTER_QUESTION_MS))
-    expect(screen.getByTestId('listening')).toBeInTheDocument()
+    expect(screen.getByTestId('hear-again').className).toMatch(/throb/)
     act(() => vi.advanceTimersByTime(CHORD_DONE_MS))
-    expect(screen.queryByTestId('listening')).toBeNull()
-    fireEvent.click(tile(current()))
+    expect(screen.getByTestId('hear-again').className).not.toMatch(/throb/)
     expect(screen.queryByTestId('listening')).toBeNull()
   })
 
@@ -165,6 +163,24 @@ describe('Session', () => {
     expect(screen.getByTestId('milestone-pop').textContent).toBe('5')
     act(() => vi.advanceTimersByTime(MILESTONE_POP_MS + 10))
     expect(screen.queryByTestId('milestone-pop')).toBeNull()
+  })
+
+  it('flashes Overtime and keeps asking when the last trial is correct but not a level-up', () => {
+    useAppStore.getState().updateSettings({
+      sessionTarget: 10,
+      pacingParams: { streakTarget: 50, eguchiWindow: 40, eguchiDays: 14, eguchiSessions: 10 },
+    })
+    useAppStore.getState().startSession()
+    renderApp(<Session />)
+    for (let i = 0; i < 10; i++) {
+      fireEvent.click(tile(current()))
+      act(() => vi.advanceTimersByTime(FEEDBACK_CORRECT_MS))
+    }
+    const session = useAppStore.getState().session!
+    expect(session.phase).toBe('question')
+    expect(session.overtime).toBe(true)
+    expect(screen.getByTestId('milestone-pop').textContent).toBe('Overtime!')
+    expect(screen.getByTestId('overtime-badge')).toBeInTheDocument()
   })
 
   it('moves to the level-up as soon as the milestone chime ends', () => {

@@ -37,17 +37,17 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
   const { player } = useAudio()
   const [lastChosen, setLastChosen] = useState<string | null>(null)
   const [listening, setListening] = useState(false)
-  const [milestone, setMilestone] = useState<number | null>(null)
+  // The centre pop shows a milestone numeral or "Overtime!", then is gone: a moment, not a counter.
+  const [pop, setPop] = useState<string | null>(null)
   const primerReplayTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const milestoneTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // A big numeral flies up with the milestone confetti, then is gone: a moment, not a counter.
   useEffect(() => {
     const off = onEngineEvent((e) => {
-      if (e.type !== 'streakMilestone') return
-      setMilestone(e.streak)
+      if (e.type !== 'streakMilestone' && e.type !== 'overtime') return
+      setPop(e.type === 'overtime' ? 'Overtime!' : String(e.streak))
       if (milestoneTimer.current) clearTimeout(milestoneTimer.current)
-      milestoneTimer.current = setTimeout(() => setMilestone(null), MILESTONE_POP_MS)
+      milestoneTimer.current = setTimeout(() => setPop(null), MILESTONE_POP_MS)
     })
     return () => {
       off()
@@ -140,17 +140,18 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
       <button className="icon-button stop-button" aria-label="Stop" onClick={endSession}>
         ✕
       </button>
-      <div className="row" style={{ minHeight: 48, justifyContent: 'center' }}>
-        {listening && (
-          <span className="listening" data-testid="listening" aria-label="Listen">
-            👂
+      {session.overtime && (
+        <p className="center" style={{ margin: 0 }}>
+          <span className="badge" data-testid="overtime-badge">
+            ⏱ Overtime: keep the streak going!
           </span>
-        )}
-      </div>
+        </p>
+      )}
       <ProgressTrail answers={session.answers} target={session.target} />
       <div className="center">
         <button
-          className="icon-button big"
+          className={`icon-button big${listening ? ' throb' : ''}`}
+          data-testid="hear-again"
           aria-label="Hear it again"
           disabled={inputLocked}
           onClick={() =>
@@ -160,9 +161,13 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
           🔊
         </button>
       </div>
-      {milestone !== null && (
-        <div className="milestone-pop" data-testid="milestone-pop" aria-hidden="true">
-          {milestone}
+      {pop !== null && (
+        <div
+          className={`milestone-pop${pop === 'Overtime!' ? ' overtime' : ''}`}
+          data-testid="milestone-pop"
+          aria-hidden="true"
+        >
+          {pop}
         </div>
       )}
       <TileGrid count={unlocked.length}>

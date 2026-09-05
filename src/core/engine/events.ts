@@ -17,4 +17,5 @@ export type EngineEvent =
   | { type: 'readyForUnlock' }
   | { type: 'levelUp'; chordId: string; level: number }
   | { type: 'chordNapped'; chordId: string }
+  | { type: 'overtime' }
   | { type: 'sessionComplete'; summary: SessionSummary }

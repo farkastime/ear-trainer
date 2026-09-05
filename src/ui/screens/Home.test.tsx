@@ -49,7 +49,7 @@ describe('Home', () => {
     expect(tiles()).toHaveLength(14)
     const blue = screen.getByTestId('tile-blue')
     expect(blue.className).toMatch(/locked/)
-    expect(blue.textContent).toBe('')
+    expect(blue.textContent).toBe('🔒')
     expect(blue).toHaveAccessibleName('Locked chord')
     expect(screen.getByTestId('tile-red').textContent).toBe('🦁')
     expect(activeProfile(useAppStore.getState())!.settings.practiceAll).toBe(true)

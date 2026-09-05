@@ -146,8 +146,9 @@ selectable in parent settings. There is no unlock gating in v1.
 
 1. Child taps **Play** on the profile home. First tap starts the audio
    context (required by iOS).
-2. **Get-ready ritual** (§5.3): the child's characters parade in while
-   samples load, then a "Get Ready!" cue, then the first chord.
+2. **Get-ready ritual** (§5.3): "Get Ready… Here they come!" over a grid
+   of the child's characters; each chord plays in turn with its tile lit,
+   then the first question.
 3. The app plays a chord for 1.5–2.5 s (randomized).
 4. Tiles for every **unlocked** chord are shown in fixed curriculum order.
    Each tile shows the chord color and character emoji. Letters are off by
@@ -157,8 +158,8 @@ selectable in parent settings. There is no unlock gating in v1.
    - **Correct:** tile pops, confetti in the chord's color, character
      bounces, ambient heat rises. No replay: the celebration is the
      confirmation. Auto-advance after 1.5 s, then a 0.5 s beat of silence
-     before the next chord. A pulsing ear shows in the header from the
-     moment a question begins until its chord has finished.
+     before the next chord. The Hear-again speaker throbs from the moment
+     a question begins until its chord has finished.
    - **Wrong:** tapped tile shakes gently, a descending two-tone "bee-oop"
      plays and the correct tile pulses so the child sees the answer; the
      chord is not replayed. Ambient heat cools. No penalty, no sad face.
@@ -176,7 +177,12 @@ selectable in parent settings. There is no unlock gating in v1.
 8. If the pacing policy fires during the session, the level-up moment
    (§6.3) runs immediately and the session then continues with the new
    chord live.
-9. On reaching the target: **session summary** (§7.3). The child can also
+9. **Overtime** (Unlimited pacing only): if the last trial at the target
+   is correct but did not fire a level-up, an "Overtime!" pop and rainbow
+   cannon fire and the session keeps asking until the streak reaches N
+   (a level-up) or a miss ends it with the summary. Eguchi and Manual end
+   at the target.
+10. On reaching the target: **session summary** (§7.3). The child can also
    end early via a small exit control; an early exit still gets a summary,
    but a session counts toward the Eguchi policy's session gate only if it
    reached at least half the target. **Play again** on the summary starts a
@@ -187,19 +193,20 @@ selectable in parent settings. There is no unlock gating in v1.
 
 Loading is a moment, not a spinner. After Play:
 
-1. The unlocked characters parade onto the screen one by one with pops.
-   Samples for the active chords and selected instrument load meanwhile.
+1. "Get Ready…" / "Here they come!" heads a grid of the child's unlocked
+   characters on neutral tiles. Samples for the active chords and selected
+   instrument load meanwhile.
 2. If the browser will not start audio without a gesture (typically after a
    reload mid-session), a "Tap to start" button appears after 1 s and the
    ritual continues from the tap.
-3. When loading is done and at least 1.5 s have passed, a "Get Ready!" cue
-   appears with a pulsing ear emoji and a short bell arpeggio: the most
-   recently unlocked chord's three notes and then its lowest note an octave
-   higher, played an octave above the test pitches.
+3. When loading is done, the chords play one by one in curriculum order
+   (1.4 s apart); the playing character's tile fills with its colour and
+   grows slightly. Tiles are not tappable here. A small **Skip** link
+   under the grid jumps straight to the session.
 4. The first chord plays.
 
-If loading takes longer than 6 s the parade loops and a small "getting the
-sounds ready…" line appears; §11 covers failure.
+If loading takes longer than 6 s a small "getting the sounds ready…" line
+appears; §11 covers failure.
 
 ### 5.1 Question selection
 
@@ -285,7 +292,7 @@ policies ship, chosen in parent settings, each with editable parameters:
 
 | Policy | Default | Ready when |
 |---|---|---|
-| **Unlimited** (default) | streak N = 10 | current in-session streak ≥ N. (Ten in a row means ten; the no-three-in-a-row selection rule already guarantees variety within the streak.) |
+| **Unlimited** (default) | streak N = 10 | current in-session streak ≥ N. (Ten in a row means ten; the no-three-in-a-row selection rule already guarantees variety within the streak.) The only policy with session overtime (§5 step 9). |
 | **Eguchi** | K = 40, D = 14 days, S = 10 sessions | accuracy over the last K answers is 100%, at least D days since the last unlock (or profile creation), and at least S sessions completed since then |
 | **Manual** | — | never automatically; the home screen shows a "ready" badge when the Unlimited rule would fire, and the parent unlocks from settings |
 
@@ -302,10 +309,10 @@ When the policy says ready, the unlock happens immediately, mid-session:
 2. Full-screen takeover: fireworks that keep launching (one every 0.7 s) for
    as long as the screen is up, a drum fanfare and a short rising jingle
    (see §7.4).
-3. The new character is revealed with its name ("Meet Owl!"), its chord plays
-   three times in quick succession (1.1 s apart, overlapping slightly) while
-   the character dances inside its own coloured tile, so it reads as
-   something to tap; tapping it replays the chord.
+3. A locked tile (🔒) in the new chord's colour shakes, flashes white and
+   reveals the character with its name ("Meet Owl!") about 0.9 s in, on the
+   jingle's last note. Nothing plays automatically: "Tap to hear it", and
+   tapping the tile plays the chord. Continue is enabled once revealed.
 4. A **Continue** tap returns to the session screen with the new tile added
    in curriculum position, bouncing and glowing.
 5. **Continue** closes the interrupted session quietly (it is recorded with
@@ -377,6 +384,12 @@ firework (launch + trail + bloom), confetti, flame (continuous), steam
 (puff). Presets map tiers and moods to emitter parameters and palettes. The
 canvas is sized in CSS pixels and drawn at device resolution, so effects
 land where the tiles are on any pixel density.
+
+Tiers: correct answer → one confetti cannon in the chord's colour and
+"ding-ding"; streak milestone (5, 10) → bigger cannon, three chimes and a
+numeral that pops over the grid, lingers, then falls; overtime → a large
+rainbow cannon with a whoosh; level-up → continuous fireworks, fanfare and
+jingle; session end → confetti rain, cymbal and jingle.
 
 ### 7.3 Session summary
 
@@ -451,14 +464,16 @@ flames; the heat vignette still shifts color). Celebration sound has its own on/
    per profile) above the real tile grid. Tapping a tile plays its chord, so
    a child can learn the sounds before being tested; this is also where a
    child who just likes pressing the squares gets to press all of them. In
-   "All chords" the locked tiles show colour only, no character: the
-   character is earned. A napping chord is shown asleep. Big Play below the
+   "All chords" the locked tiles show colour and a lock icon, no
+   character: the character is earned. A napping chord is shown asleep. Big Play below the
    grid enters the ritual and the session; stopping a session records it
    and returns via the summary, so Home and a live session never coexist.
-3. **Get-ready** — character parade and "Get Ready!" cue (§5.3).
+3. **Get-ready** — "Get Ready… Here they come!" grid run-through with
+   Skip (§5.3).
 4. **Session** — chord tiles (emoji filling half the tile), ambient heat
-   vignette, listening cue, progress trail, hear-again; a small Stop pinned
-   to the top-left corner of the screen.
+   vignette, progress trail, hear-again speaker that throbs while the
+   chord plays, overtime badge when in overtime; a small Stop pinned to
+   the top-left corner of the screen.
 5. **Level-up takeover** — overlay and primer (§6.3).
 6. **Session summary** — §7.3.
 7. **Parent settings** — §9.

@@ -100,6 +100,15 @@ describe('CelebrationLayer', () => {
     expect(system.count).toBe(afterContinue)
   })
 
+  it('fires rainbow confetti and a whoosh when overtime begins', () => {
+    const system = new ParticleSystem(5000, mulberry32(1))
+    const sfx = createNullSfx()
+    renderApp(<CelebrationLayer system={system} />, { sfx })
+    act(() => emitEngineEvents([{ type: 'overtime' }]))
+    expect(system.count).toBeGreaterThan(0)
+    expect(sfx.calls).toEqual(['whoosh'])
+  })
+
   it('rains confetti with a cymbal and jingle when a session completes', () => {
     const system = new ParticleSystem(5000, mulberry32(1))
     const sfx = createNullSfx()

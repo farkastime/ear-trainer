@@ -241,6 +241,82 @@ describe('level up', () => {
   })
 })
 
+describe('overtime', () => {
+  const highTarget = { streakTarget: 50, eguchiWindow: 40, eguchiDays: 14, eguchiSessions: 10 }
+
+  function playThrough(profile: Profile, correct: (i: number) => boolean, n: number) {
+    const start = startSession(profile, deps())
+    profile = withProgression(profile, start)
+    let session = start.session
+    const events: EngineEvent[] = []
+    for (let i = 0; i < n; i++) {
+      const r = play(profile, session, correct(i), 2000 + i)
+      profile = r.profile
+      session = r.session
+      events.push(...r.events)
+    }
+    return { profile, session, events }
+  }
+
+  it('under Unlimited pacing a correct final answer without an unlock enters overtime', () => {
+    const { session, events } = playThrough(
+      makeProfile({ settings: { sessionTarget: 5, pacingParams: highTarget } }),
+      () => true,
+      5,
+    )
+    expect(session.phase).toBe('question')
+    expect(session.overtime).toBe(true)
+    expect(events.filter((e) => e.type === 'overtime')).toHaveLength(1)
+  })
+
+  it('overtime ends at the first miss and records the whole run', () => {
+    const { session, profile } = playThrough(
+      makeProfile({ settings: { sessionTarget: 5, pacingParams: highTarget } }),
+      (i) => i !== 7,
+      8,
+    )
+    expect(session.phase).toBe('summary')
+    expect(session.summary).toMatchObject({ count: 8, correct: 7 })
+    expect(profile.progression.sessions).toHaveLength(1)
+  })
+
+  it('overtime can end in a level-up', () => {
+    const { session } = playThrough(
+      makeProfile({
+        settings: {
+          sessionTarget: 5,
+          pacingParams: { ...highTarget, streakTarget: 7 },
+        },
+      }),
+      () => true,
+      7,
+    )
+    expect(session.phase).toBe('levelUp')
+  })
+
+  it('a wrong final answer ends the session normally', () => {
+    const { session } = playThrough(
+      makeProfile({ settings: { sessionTarget: 5, pacingParams: highTarget } }),
+      (i) => i !== 4,
+      5,
+    )
+    expect(session.phase).toBe('summary')
+    expect(session.overtime).toBe(false)
+  })
+
+  it('Eguchi and Manual pacing end at the target regardless', () => {
+    for (const pacing of ['eguchi', 'manual'] as const) {
+      const { session, events } = playThrough(
+        makeProfile({ settings: { sessionTarget: 5, pacing } }),
+        () => true,
+        5,
+      )
+      expect(session.phase).toBe('summary')
+      expect(events.some((e) => e.type === 'overtime')).toBe(false)
+    }
+  })
+})
+
 describe('endSession', () => {
   function playN(profile: Profile, n: number, correct: (i: number) => boolean) {
     const start = startSession(profile, deps())

@@ -13,8 +13,6 @@ export interface Sfx {
   cymbal(): void
   steam(): void
   wrong(): void
-  /** Get-ready cue: the chord's notes then its lowest note an octave higher, arpeggiated. */
-  readyArpeggio(chordNotes: readonly string[]): void
   /** Three chimes: the tapped chord's notes an octave up, in order. */
   milestone(chordNotes: readonly string[]): void
   fanfare(): void
@@ -35,7 +33,6 @@ export function createNullSfx(): Sfx & { calls: string[] } {
     cymbal: rec('cymbal'),
     steam: rec('steam'),
     wrong: rec('wrong'),
-    readyArpeggio: rec('readyArpeggio'),
     milestone: rec('milestone'),
     fanfare: rec('fanfare'),
     jingleLevelUp: rec('jingleLevelUp'),
@@ -192,14 +189,6 @@ export function createToneSfx(): Sfx {
       safely(() => {
         blip!.triggerAttackRelease('E3', 0.18, at('blip'))
         blip!.triggerAttackRelease('A2', 0.35, at('blip', 0.2))
-      })
-    },
-    readyArpeggio(chordNotes) {
-      // Triad plus octave, an octave up, so the cue is musical but distinct from the test chord.
-      safely(() => {
-        const up = transpose(chordNotes, OCTAVE)
-        const sequence = [...up, midiToNote(noteToMidi(up[0]) + OCTAVE)]
-        sequence.forEach((note, i) => bell!.triggerAttackRelease(note, 0.35, at('bell', i * 0.18)))
       })
     },
     milestone(chordNotes) {

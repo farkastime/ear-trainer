@@ -33,7 +33,9 @@ export function ChordTile({ chord, showLetters, napping, flash, disabled, locked
         return () => registerAnchor(chord.id, null)
       }}
     >
-      {locked ? null : chord.character.artUrl ? (
+      {locked ? (
+        <span className="lock">🔒</span>
+      ) : chord.character.artUrl ? (
         <img src={chord.character.artUrl} alt="" />
       ) : (
         <span>{chord.character.emoji}</span>

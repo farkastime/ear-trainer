@@ -33,6 +33,8 @@ export interface SessionState {
   phase: SessionPhase
   pendingLevelUp: string | null
   leveledUp: boolean
+  /** Past the target on a live streak (Unlimited pacing only): play on until 10 in a row or a miss. */
+  overtime: boolean
   summary: SessionSummary | null
 }
 
@@ -92,6 +94,7 @@ export function startSession(profile: Profile, deps: EngineDeps): EngineResult {
     phase: 'question',
     pendingLevelUp: null,
     leveledUp: false,
+    overtime: false,
     summary: null,
   }
   const asked = ask(progression, base, deps.rng)
@@ -207,7 +210,23 @@ export function advance(profile: Profile, session: SessionState, deps: EngineDep
     }
   }
 
-  if (session.answers.length >= session.target) return endSession(profile, session, deps)
+  if (session.answers.length >= session.target) {
+    const last = session.answers[session.answers.length - 1]
+    // Overtime belongs to Unlimited pacing only; Eguchi and Manual end at the target.
+    const canGoOn =
+      profile.settings.pacing === 'unlimited' &&
+      last.correct &&
+      profile.progression.napping === null &&
+      !isChampion(profile.progression)
+    if (!canGoOn) return endSession(profile, session, deps)
+    const events: EngineEvent[] = session.overtime ? [] : [{ type: 'overtime' }]
+    const asked = ask(profile.progression, { ...session, overtime: true }, deps.rng)
+    return {
+      session: asked.session,
+      progression: profile.progression,
+      events: [...events, asked.event],
+    }
+  }
 
   const asked = ask(profile.progression, session, deps.rng)
   return { session: asked.session, progression: profile.progression, events: [asked.event] }

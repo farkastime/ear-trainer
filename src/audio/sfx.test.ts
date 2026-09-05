@@ -106,17 +106,6 @@ describe('createToneSfx', () => {
     expect(by('drum').starts).toHaveLength(0)
   })
 
-  it('the get-ready cue arpeggiates the chord plus its octave, an octave up', () => {
-    const sfx = createToneSfx()
-    sfx.readyArpeggio(['C4', 'F4', 'A4'])
-    const bell = synths.filter((s) => s.kind === 'blip')[1] as InstanceType<typeof FakeSynth> & {
-      notes: string[]
-    }
-    expect(bell.notes).toEqual(['C5', 'F5', 'A5', 'C6'])
-    expect(bell.starts).toHaveLength(4)
-    expect(by('noise').starts).toHaveLength(0)
-  })
-
   it('the level-up jingle is transposed into the key it is given', () => {
     const sfx = createToneSfx()
     sfx.jingleLevelUp('C')

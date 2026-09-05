@@ -81,6 +81,13 @@ export function CelebrationLayer({ system }: { system?: ParticleSystem }) {
           if (sound) sfx.whoosh()
           break
         }
+        case 'overtime': {
+          const o = origin()
+          cannon(sys, o.x, o.y, CONFETTI_COLORS, scale * 1.4)
+          if (sound) sfx.whoosh()
+          vibrate([30, 40, 30], haptics)
+          break
+        }
         case 'levelUp': {
           const launch = () =>
             firework(

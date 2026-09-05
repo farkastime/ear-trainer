@@ -1,19 +1,22 @@
 import { useEffect, useRef, useState } from 'react'
 import { loadWithFallback } from '../../audio/loading'
 import { chordById } from '../../core/content/chords'
-import { awakeChordIds, newestUnlockedId, unlockedChordIds } from '../../core/content/curriculum'
+import { awakeChordIds, unlockedChordIds } from '../../core/content/curriculum'
 import { DEFAULT_INSTRUMENT_ID, instrumentById } from '../../core/content/instruments'
 import { activeProfile, useAppStore } from '../../state/store'
 import { useAudio } from '../AudioContext'
-import { CharacterParade } from '../components/CharacterParade'
+import { ChordTile } from '../components/ChordTile'
+import { TileGrid } from '../components/TileGrid'
+import { usePrimer } from '../hooks/usePrimer'
 
-export const MIN_RITUAL_MS = 1500
-export const LISTEN_MS = 2000
 export const SLOW_LOAD_MS = 6000
 /** Browsers only start audio from a user gesture; past this wait we ask for a tap. */
 export const UNLOCK_WAIT_MS = 1000
+/** The run-through plays each awake chord in turn, lighting its tile. */
+export const RUN_STEP_MS = 1400
+const RUN_SECONDS = 1.2
 
-type Stage = 'loading' | 'tap' | 'listen' | 'error'
+type Stage = 'loading' | 'tap' | 'run' | 'error'
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
 
@@ -23,24 +26,39 @@ export function GetReady() {
   const startSession = useAppStore((s) => s.startSession)
   const goTo = useAppStore((s) => s.goTo)
   const setAudioFallback = useAppStore((s) => s.setAudioFallback)
-  const { player, sfx } = useAudio()
+  const { player } = useAudio()
   const [stage, setStage] = useState<Stage>('loading')
   const [slow, setSlow] = useState(false)
   const [attempt, setAttempt] = useState(0)
+  const [runIds, setRunIds] = useState<string[] | null>(null)
   const tapped = useRef<(() => void) | null>(null)
+  const resuming = useRef(false)
+
+  function proceed() {
+    setRunIds(null)
+    if (resuming.current) goTo('session')
+    else startSession()
+  }
+
+  const { activeId } = usePrimer(runIds, {
+    onStep: (id) => player.playChord([...chordById(id).notes], RUN_SECONDS),
+    onDone: proceed,
+    stepMs: RUN_STEP_MS,
+  })
 
   useEffect(() => {
     if (!profile) return
     let cancelled = false
     setStage('loading')
     setSlow(false)
+    setRunIds(null)
     const slowTimer = setTimeout(() => setSlow(true), SLOW_LOAD_MS)
-    const resuming = session !== null && session.phase !== 'summary'
-    const notes = awakeChordIds(profile.progression).flatMap((id) => [...chordById(id).notes])
+    resuming.current = session !== null && session.phase !== 'summary'
+    const awake = awakeChordIds(profile.progression)
+    const notes = awake.flatMap((id) => [...chordById(id).notes])
     const instrument = instrumentById(profile.settings.instrumentId)
 
     ;(async () => {
-      const minimum = sleep(MIN_RITUAL_MS)
       // Decoding samples does not need a running context, so loading starts at once.
       const loading = loadWithFallback(
         player,
@@ -65,19 +83,13 @@ export function GetReady() {
       }
 
       const result = await loading
+      if (cancelled) return
       setAudioFallback(
         result.fellBack ? { requested: instrument.id, used: result.instrument.id } : null,
       )
-      await minimum
-      if (cancelled) return
       clearTimeout(slowTimer)
-      setStage('listen')
-      if (profile.settings.celebrationSound)
-        sfx.readyArpeggio(chordById(newestUnlockedId(profile.progression.unlocks)).notes)
-      await sleep(LISTEN_MS)
-      if (cancelled) return
-      if (resuming) goTo('session')
-      else startSession()
+      setStage('run')
+      setRunIds(awake)
     })().catch(() => {
       if (cancelled) return
       clearTimeout(slowTimer)
@@ -99,6 +111,7 @@ export function GetReady() {
   }
 
   if (!profile) return null
+  const unlocked = unlockedChordIds(profile.progression.unlocks)
   return (
     <div
       className="screen center"
@@ -117,21 +130,41 @@ export function GetReady() {
             Back
           </button>
         </>
-      ) : stage === 'listen' ? (
-        <div className="listen" role="status" aria-label="Get Ready!">
-          <span>👂</span>
-          <span>Get</span>
-          <span>Ready!</span>
-        </div>
       ) : (
         <>
-          <CharacterParade chordIds={unlockedChordIds(profile.progression.unlocks)} />
+          <h1 className="screen-title" style={{ margin: 0 }}>
+            Get Ready…
+          </h1>
+          <p className="muted" style={{ margin: 0 }}>
+            Here they come!
+          </p>
+          <div className="parade-grid">
+            <TileGrid count={unlocked.length}>
+              {unlocked.map((id) => (
+                <ChordTile
+                  key={id}
+                  chord={chordById(id)}
+                  showLetters={false}
+                  napping={profile.progression.napping === id}
+                  flash={activeId === id ? 'highlight' : null}
+                  disabled
+                  onTap={() => {}}
+                />
+              ))}
+            </TileGrid>
+          </div>
           {stage === 'tap' ? (
             <button className="big-button" onClick={onTap}>
               👆 Tap to start
             </button>
+          ) : stage === 'run' ? (
+            <button className="link-button" onClick={proceed}>
+              Skip ▶
+            </button>
           ) : (
-            <p className="muted">{slow ? 'Getting the sounds ready…' : 'Here they come!'}</p>
+            <p className="muted" style={{ minHeight: '1.5em' }}>
+              {slow ? 'Getting the sounds ready…' : ''}
+            </p>
           )}
         </>
       )}

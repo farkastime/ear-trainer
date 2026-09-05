@@ -494,11 +494,6 @@ button {
     opacity: 1;
   }
 }
-.listening {
-  display: inline-block;
-  font-size: 2rem;
-  animation: pulse 0.8s ease infinite;
-}
 .listen {
   display: grid;
   justify-items: center;
@@ -529,6 +524,76 @@ button {
 .session > * {
   position: relative;
   z-index: 1;
+}
+.session {
+  padding-top: 64px;
+}
+.throb {
+  animation: throb 0.45s ease-in-out infinite alternate;
+}
+@keyframes throb {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.18);
+  }
+}
+.milestone-pop.overtime {
+  font-size: 3.4rem;
+}
+/* Get-ready run-through: tiles are quiet until their chord plays. */
+.parade-grid .tile {
+  background: var(--field);
+  box-shadow: none;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+.parade-grid .tile.highlight {
+  background: var(--tile-color);
+  outline: none;
+  transform: scale(1.06);
+}
+.tile .lock {
+  font-size: 30cqw;
+  opacity: 0.85;
+}
+/* Unlock: the locked tile rattles, then flashes white just before the character appears. */
+.tile.unlocking {
+  animation: unlock 0.9s ease-in forwards;
+}
+@keyframes unlock {
+  0%,
+  60% {
+    filter: brightness(1);
+  }
+  10%,
+  30%,
+  50% {
+    transform: translateX(-10px) rotate(-3deg);
+  }
+  20%,
+  40% {
+    transform: translateX(10px) rotate(3deg);
+  }
+  75% {
+    filter: brightness(3);
+    transform: scale(1.12);
+  }
+  100% {
+    filter: brightness(1.6);
+    transform: scale(1.06);
+  }
+}
+.link-button {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  text-decoration: underline;
+  font-size: 1rem;
+  padding: 8px;
+  cursor: pointer;
 }
 /* Overlays inside the session must not join the flow or push the grid. */
 .session > .milestone-pop {

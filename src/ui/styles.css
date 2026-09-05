@@ -671,6 +671,11 @@ button {
   gap: 12px;
   padding: 8px 0;
 }
+/* A file-picker label styled as a button keeps the button's box, not the settings-row one. */
+.settings-section label.big-button {
+  display: inline-block;
+  padding: 22px 40px;
+}
 .settings-section input[type='number'],
 .settings-section select {
   font-size: 1rem;
@@ -698,4 +703,30 @@ button {
     animation: none !important;
     transition: none !important;
   }
+}
+
+/* about */
+.about .card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.about h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+.about p,
+.about li {
+  margin: 0;
+  line-height: 1.5;
+}
+.about ul {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.about .small {
+  font-size: 0.85rem;
 }

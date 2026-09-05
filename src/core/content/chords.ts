@@ -103,6 +103,11 @@ export const CHORDS: readonly Chord[] = [
 
 const BY_ID = new Map(CHORDS.map((c) => [c.id, c]))
 
+/** Pitch class of the chord's root, from its label: `F/C` is rooted on F. */
+export function chordRoot(chord: Chord): string {
+  return chord.label.split('/')[0]
+}
+
 export function chordById(id: string): Chord {
   const chord = BY_ID.get(id)
   if (!chord) throw new Error(`unknown chord: ${id}`)

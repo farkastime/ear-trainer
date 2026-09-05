@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { loadWithFallback } from '../../audio/loading'
 import { chordById } from '../../core/content/chords'
-import { awakeChordIds, unlockedChordIds } from '../../core/content/curriculum'
+import { awakeChordIds, newestUnlockedId, unlockedChordIds } from '../../core/content/curriculum'
 import { DEFAULT_INSTRUMENT_ID, instrumentById } from '../../core/content/instruments'
 import { activeProfile, useAppStore } from '../../state/store'
 import { useAudio } from '../AudioContext'
@@ -72,7 +72,8 @@ export function GetReady() {
       if (cancelled) return
       clearTimeout(slowTimer)
       setStage('listen')
-      if (profile.settings.celebrationSound) sfx.listenCue()
+      if (profile.settings.celebrationSound)
+        sfx.readyArpeggio(chordById(newestUnlockedId(profile.progression.unlocks)).notes)
       await sleep(LISTEN_MS)
       if (cancelled) return
       if (resuming) goTo('session')

@@ -1,6 +1,6 @@
 import { useEffect, type CSSProperties } from 'react'
 import { loadWithFallback } from '../../audio/loading'
-import { chordById } from '../../core/content/chords'
+import { chordById, chordRoot } from '../../core/content/chords'
 import { newestUnlockedId } from '../../core/content/curriculum'
 import { DEFAULT_INSTRUMENT_ID, instrumentById } from '../../core/content/instruments'
 import { activeProfile, useAppStore } from '../../state/store'
@@ -14,13 +14,17 @@ export function LevelUp() {
   const profile = useAppStore(activeProfile)
   const continueAfterLevelUp = useAppStore((s) => s.continueAfterLevelUp)
   const { player, sfx } = useAudio()
+  const session = useAppStore((s) => s.session)
   const chord = profile ? chordById(newestUnlockedId(profile.progression.unlocks)) : null
+  // The jingle is in the key of the chord whose correct answer earned the unlock.
+  const earnedBy = session?.answers[session.answers.length - 1]?.chordId
+  const key = chordRoot(chordById(earnedBy ?? chord?.id ?? 'red'))
 
   useEffect(() => {
     if (!chord || !profile) return
     if (profile.settings.celebrationSound) {
       sfx.fanfare()
-      sfx.jingleLevelUp()
+      sfx.jingleLevelUp(key)
     }
     let cancelled = false
     let timers: ReturnType<typeof setTimeout>[] = []

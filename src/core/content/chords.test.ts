@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CHORDS, chordById } from './chords'
+import { CHORDS, chordById, chordRoot } from './chords'
 
 describe('CHORDS', () => {
   it('has the 14 curriculum chords in Eguchi order', () => {
@@ -46,6 +46,13 @@ describe('CHORDS', () => {
     expect(unique(CHORDS.map((c) => c.id))).toBe(true)
     expect(unique(CHORDS.map((c) => c.color))).toBe(true)
     expect(unique(CHORDS.map((c) => c.character.emoji))).toBe(true)
+  })
+
+  it('names the root of inverted chords from the label', () => {
+    expect(chordRoot(chordById('red'))).toBe('C')
+    expect(chordRoot(chordById('yellow'))).toBe('F')
+    expect(chordRoot(chordById('blue'))).toBe('G')
+    expect(chordRoot(chordById('lightpurple'))).toBe('Bb')
   })
 
   it('looks up by id and throws on unknown', () => {

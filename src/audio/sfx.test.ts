@@ -106,12 +106,28 @@ describe('createToneSfx', () => {
     expect(by('drum').starts).toHaveLength(0)
   })
 
-  it('the listen cue is three quick taps', () => {
+  it('the get-ready cue arpeggiates the chord plus its octave, an octave up', () => {
     const sfx = createToneSfx()
-    sfx.listenCue()
-    const noise = by('noise')
-    expect(noise.starts).toHaveLength(3)
-    expect(noise.starts[2] - noise.starts[0]).toBeCloseTo(0.52)
+    sfx.readyArpeggio(['C4', 'F4', 'A4'])
+    const bell = synths.filter((s) => s.kind === 'blip')[1] as InstanceType<typeof FakeSynth> & {
+      notes: string[]
+    }
+    expect(bell.notes).toEqual(['C5', 'F5', 'A5', 'C6'])
+    expect(bell.starts).toHaveLength(4)
+    expect(by('noise').starts).toHaveLength(0)
+  })
+
+  it('the level-up jingle is transposed into the key it is given', () => {
+    const sfx = createToneSfx()
+    sfx.jingleLevelUp('C')
+    sfx.jingleLevelUp('F')
+    sfx.jingleLevelUp('Bb')
+    const bell = synths.filter((s) => s.kind === 'blip')[1] as InstanceType<typeof FakeSynth> & {
+      notes: string[]
+    }
+    expect(bell.notes.slice(0, 6)).toEqual(['C6', 'E6', 'G6', 'C7', 'G6', 'C7'])
+    expect(bell.notes.slice(6, 12)).toEqual(['F5', 'A5', 'C6', 'F6', 'C6', 'F6'])
+    expect(bell.notes.slice(12, 18)).toEqual(['A#5', 'D6', 'F6', 'A#6', 'F6', 'A#6'])
   })
 
   it("a correct answer dings the chord's outer notes an octave up", () => {
@@ -139,7 +155,7 @@ describe('createToneSfx', () => {
 
   it('jingles play their notes in strictly increasing time on the bell synth', () => {
     const sfx = createToneSfx()
-    sfx.jingleLevelUp()
+    sfx.jingleLevelUp('C')
     sfx.jingleSessionEnd()
     const bells = synths.filter((s) => s.kind === 'blip')
     // Two Synth instances exist: the miss blip (created first) and the jingle bell.

@@ -193,8 +193,9 @@ Loading is a moment, not a spinner. After Play:
    reload mid-session), a "Tap to start" button appears after 1 s and the
    ritual continues from the tap.
 3. When loading is done and at least 1.5 s have passed, a "Get Ready!" cue
-   appears with a pulsing ear emoji and three quick unpitched taps
-   ("t-t-tap").
+   appears with a pulsing ear emoji and a short bell arpeggio: the most
+   recently unlocked chord's three notes and then its lowest note an octave
+   higher, played an octave above the test pitches.
 4. The first chord plays.
 
 If loading takes longer than 6 s the parade loops and a small "getting the
@@ -394,7 +395,9 @@ tapped chord's lowest and highest notes an octave up) and the milestone
 chime (the whole chord an octave up), which echo the chord just heard
 rather than adding a stray pitch, and give each chord its own sound; the
 miss "bee-oop", a descending two-tone blip an octave below the vocabulary;
-and two short bell jingles above it, a rising one at level-up and a
+and two short bell jingles above it, a rising major arpeggio at level-up
+played in the key of the chord whose answer earned the unlock (so ding-ding,
+the three-chime and the jingle share a key) and a
 four-note tune at session end, so those moments have a signature the child
 recognises.
 Haptics via `navigator.vibrate` where supported.

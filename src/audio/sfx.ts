@@ -1,5 +1,5 @@
 import * as Tone from 'tone'
-import { transpose } from './notes'
+import { midiToNote, noteToMidi, transpose } from './notes'
 
 const MIN_GAP_S = 0.005
 const OCTAVE = 12
@@ -13,11 +13,13 @@ export interface Sfx {
   cymbal(): void
   steam(): void
   wrong(): void
-  listenCue(): void
+  /** Get-ready cue: the chord's notes then its lowest note an octave higher, arpeggiated. */
+  readyArpeggio(chordNotes: readonly string[]): void
   /** Three chimes: the tapped chord's notes an octave up, in order. */
   milestone(chordNotes: readonly string[]): void
   fanfare(): void
-  jingleLevelUp(): void
+  /** Rising arpeggio in the given key (a pitch class such as 'C', 'F', 'Bb'). */
+  jingleLevelUp(key: string): void
   jingleSessionEnd(): void
 }
 
@@ -33,7 +35,7 @@ export function createNullSfx(): Sfx & { calls: string[] } {
     cymbal: rec('cymbal'),
     steam: rec('steam'),
     wrong: rec('wrong'),
-    listenCue: rec('listenCue'),
+    readyArpeggio: rec('readyArpeggio'),
     milestone: rec('milestone'),
     fanfare: rec('fanfare'),
     jingleLevelUp: rec('jingleLevelUp'),
@@ -42,14 +44,42 @@ export function createNullSfx(): Sfx & { calls: string[] } {
 }
 
 // Jingles live an octave above the chord vocabulary (highest chord note E5).
-const LEVEL_UP_JINGLE: [string, number][] = [
-  ['C6', 0],
-  ['E6', 0.12],
-  ['G6', 0.24],
-  ['C7', 0.36],
-  ['G6', 0.6],
-  ['C7', 0.72],
+// The level-up jingle is a major arpeggio in the key of the chord that earned it:
+// semitone offsets from the root, with note times in seconds.
+const LEVEL_UP_JINGLE: [number, number][] = [
+  [0, 0],
+  [4, 0.12],
+  [7, 0.24],
+  [12, 0.36],
+  [7, 0.6],
+  [12, 0.72],
 ]
+const KEY_OFFSET: Record<string, number> = {
+  C: 0,
+  'C#': 1,
+  Db: 1,
+  D: 2,
+  'D#': 3,
+  Eb: 3,
+  E: 4,
+  F: 5,
+  'F#': 6,
+  Gb: 6,
+  G: 7,
+  'G#': 8,
+  Ab: 8,
+  A: 9,
+  'A#': 10,
+  Bb: 10,
+  B: 11,
+}
+
+/** Jingle root for a key: roots C–E sit in octave 6, F–B drop to octave 5 so the top note stays below C8. */
+function jingleRoot(key: string): string {
+  const offset = KEY_OFFSET[key] ?? 0
+  const octave = offset >= 5 ? 5 : 6
+  return midiToNote((octave + 1) * 12 + offset)
+}
 const SESSION_END_JINGLE: [string, number][] = [
   ['G6', 0],
   ['E6', 0.15],
@@ -164,14 +194,12 @@ export function createToneSfx(): Sfx {
         blip!.triggerAttackRelease('A2', 0.35, at('blip', 0.2))
       })
     },
-    listenCue() {
-      // Three quick taps ("t-t-tap") announce that a question is coming.
+    readyArpeggio(chordNotes) {
+      // Triad plus octave, an octave up, so the cue is musical but distinct from the test chord.
       safely(() => {
-        filter!.frequency.value = 2500
-        noise!.envelope.decay = 0.08
-        noise!.triggerAttackRelease(0.06, at('noise'))
-        noise!.triggerAttackRelease(0.06, at('noise', 0.26))
-        noise!.triggerAttackRelease(0.12, at('noise', 0.52))
+        const up = transpose(chordNotes, OCTAVE)
+        const sequence = [...up, midiToNote(noteToMidi(up[0]) + OCTAVE)]
+        sequence.forEach((note, i) => bell!.triggerAttackRelease(note, 0.35, at('bell', i * 0.18)))
       })
     },
     milestone(chordNotes) {
@@ -181,8 +209,13 @@ export function createToneSfx(): Sfx {
         )
       })
     },
-    jingleLevelUp() {
-      safely(() => playJingle(LEVEL_UP_JINGLE))
+    jingleLevelUp(key) {
+      safely(() => {
+        const root = noteToMidi(jingleRoot(key))
+        for (const [semitones, offset] of LEVEL_UP_JINGLE) {
+          bell!.triggerAttackRelease(midiToNote(root + semitones), 0.2, at('bell', offset))
+        }
+      })
     },
     jingleSessionEnd() {
       safely(() => playJingle(SESSION_END_JINGLE))

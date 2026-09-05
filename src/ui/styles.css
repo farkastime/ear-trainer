@@ -500,8 +500,17 @@ button {
   animation: pulse 0.8s ease infinite;
 }
 .listen {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
   font-size: 3rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
   animation: pulse 1s ease infinite;
+}
+.listen > span:first-child {
+  font-size: 4rem;
 }
 
 /* celebration canvas */

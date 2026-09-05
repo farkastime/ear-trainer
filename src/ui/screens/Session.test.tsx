@@ -56,6 +56,21 @@ describe('Session', () => {
     expect(useAppStore.getState().session!.phase).toBe('question')
   })
 
+  it('does not carry a shake target over to the next question', () => {
+    useAppStore.getState().startSession()
+    renderApp(<Session />)
+    const firstAsked = current()
+    const wrong = firstAsked === 'red' ? 'yellow' : 'red'
+    fireEvent.click(tile(wrong))
+    act(() => vi.advanceTimersByTime(FEEDBACK_MS + 500))
+    const secondAsked = current()
+    fireEvent.click(tile(secondAsked))
+    expect(
+      screen.getAllByTestId(/^tile-(?!grid$)/).some((t) => t.className.includes('shake')),
+    ).toBe(false)
+    expect(tile(secondAsked).className).toMatch(/pop/)
+  })
+
   it('ignores taps during feedback and on a napping tile', () => {
     useAppStore.getState().parentUnlockNext()
     useAppStore.setState((s) => ({

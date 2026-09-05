@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { randomDuration } from '../../audio/duration'
 import { heatVars } from '../../celebrations/heat'
 import { chordById } from '../../core/content/chords'
@@ -33,6 +33,7 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
   const clearPrimer = useAppStore((s) => s.clearPrimer)
   const { player } = useAudio()
   const [lastChosen, setLastChosen] = useState<string | null>(null)
+  const primerReplayTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const play = (chordId: string, seconds: number) =>
     player.playChord([...chordById(chordId).notes], seconds)
@@ -40,10 +41,21 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
   const { activeId: primerId } = usePrimer(pendingPrimer, {
     onStep: (id, last) => {
       play(id, PRIMER_SECONDS)
-      if (last) setTimeout(() => play(id, PRIMER_SECONDS), 800)
+      if (primerReplayTimer.current) clearTimeout(primerReplayTimer.current)
+      if (last) primerReplayTimer.current = setTimeout(() => play(id, PRIMER_SECONDS), 800)
     },
     onDone: clearPrimer,
   })
+
+  useEffect(() => {
+    return () => {
+      if (primerReplayTimer.current) clearTimeout(primerReplayTimer.current)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (session.phase === 'question') setLastChosen(null)
+  }, [session.phase, session.answers.length])
 
   useEffect(() => {
     if (session.phase !== 'question' || !session.currentChordId || pendingPrimer) return

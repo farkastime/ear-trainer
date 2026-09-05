@@ -320,6 +320,9 @@ button {
   color: #3a1a00;
   transition: transform 0.2s;
 }
+.streak-badge.warm {
+  transform: scale(1.05);
+}
 .streak-badge.hot {
   transform: scale(1.15);
   animation: pulse 1s ease infinite;

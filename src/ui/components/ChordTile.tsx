@@ -24,7 +24,10 @@ export function ChordTile({ chord, showLetters, napping, flash, disabled, onTap 
       disabled={disabled || napping}
       aria-label={chord.character.name}
       onClick={() => onTap(chord.id)}
-      ref={(el) => registerAnchor(chord.id, el)}
+      ref={(el) => {
+        registerAnchor(chord.id, el)
+        return () => registerAnchor(chord.id, null)
+      }}
     >
       {chord.character.artUrl ? (
         <img src={chord.character.artUrl} alt="" />

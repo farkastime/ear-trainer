@@ -15,6 +15,48 @@ export function ParentSettings() {
   return <SettingsBody />
 }
 
+/**
+ * Keeps what the parent is typing as a draft so the field can be emptied and retyped;
+ * in-range values are stored as they are typed, anything else is stored (clamped) on blur or Enter.
+ */
+function NumberInput({
+  label,
+  min,
+  max,
+  value,
+  onCommit,
+}: {
+  label: string
+  min: number
+  max: number
+  value: number
+  onCommit: (n: number) => void
+}) {
+  const [draft, setDraft] = useState<string | null>(null)
+  return (
+    <input
+      type="number"
+      aria-label={label}
+      min={min}
+      max={max}
+      value={draft ?? value}
+      onChange={(e) => {
+        const raw = e.target.value
+        setDraft(raw)
+        const n = Number(raw)
+        if (raw !== '' && Number.isInteger(n) && n >= min && n <= max) onCommit(n)
+      }}
+      onBlur={() => {
+        if (draft !== null && draft !== '') onCommit(Number(draft))
+        setDraft(null)
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') e.currentTarget.blur()
+      }}
+    />
+  )
+}
+
 function SettingsBody() {
   const profile = useAppStore(activeProfile)
   const session = useAppStore((s) => s.session)
@@ -31,21 +73,15 @@ function SettingsBody() {
   if (!profile) return null
   const { settings, progression } = profile
 
-  const setParam = (key: keyof PacingParams, raw: string) => {
-    if (raw === '') return
-    updateSettings({ pacingParams: { ...settings.pacingParams, [key]: Number(raw) } })
-  }
-
   const numberField = (label: string, key: keyof PacingParams) => (
     <label>
       {label}
-      <input
-        type="number"
-        aria-label={label}
+      <NumberInput
+        label={label}
         min={PACING_LIMITS[key][0]}
         max={PACING_LIMITS[key][1]}
         value={settings.pacingParams[key]}
-        onChange={(e) => setParam(key, e.target.value)}
+        onCommit={(n) => updateSettings({ pacingParams: { ...settings.pacingParams, [key]: n } })}
       />
     </label>
   )
@@ -100,16 +136,12 @@ function SettingsBody() {
         )}
         <label>
           Questions per session
-          <input
-            type="number"
-            aria-label="Questions per session"
+          <NumberInput
+            label="Questions per session"
             min={SESSION_TARGET_LIMITS[0]}
             max={SESSION_TARGET_LIMITS[1]}
             value={settings.sessionTarget}
-            onChange={(e) => {
-              if (e.target.value === '') return
-              updateSettings({ sessionTarget: Number(e.target.value) })
-            }}
+            onCommit={(n) => updateSettings({ sessionTarget: n })}
           />
         </label>
         {progression.readyForUnlock && <p className="badge">Ready to unlock</p>}

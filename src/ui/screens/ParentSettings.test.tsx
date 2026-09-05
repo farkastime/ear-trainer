@@ -42,6 +42,25 @@ describe('ParentSettings', () => {
     expect(activeProfile(useAppStore.getState())!.settings.sessionTarget).toBe(30)
   })
 
+  it('lets a number be backspaced to empty and retyped, storing it once in range', () => {
+    renderApp(<ParentSettings />)
+    passGate()
+    const field = screen.getByLabelText(/correct in a row/i) as HTMLInputElement
+    expect(field.value).toBe('10')
+    fireEvent.change(field, { target: { value: '1' } })
+    expect(field.value).toBe('1')
+    expect(activeProfile(useAppStore.getState())!.settings.pacingParams.streakTarget).toBe(10)
+    fireEvent.change(field, { target: { value: '' } })
+    expect(field.value).toBe('')
+    fireEvent.change(field, { target: { value: '6' } })
+    expect(activeProfile(useAppStore.getState())!.settings.pacingParams.streakTarget).toBe(6)
+    fireEvent.change(field, { target: { value: '99' } })
+    fireEvent.keyDown(field, { key: 'Enter' })
+    fireEvent.blur(field)
+    expect(activeProfile(useAppStore.getState())!.settings.pacingParams.streakTarget).toBe(50)
+    expect(field.value).toBe('50')
+  })
+
   it('unlocks, wakes, rewinds and resets with confirmation', () => {
     vi.spyOn(window, 'confirm').mockReturnValue(true)
     renderApp(<ParentSettings />)

@@ -15,6 +15,7 @@ function looksLikeProfile(x: unknown): x is Profile {
     typeof p.id === 'string' &&
     typeof p.name === 'string' &&
     typeof p.settings === 'object' &&
+    p.settings !== null &&
     prog !== undefined &&
     Array.isArray(prog.unlocks) &&
     Array.isArray(prog.sessions)

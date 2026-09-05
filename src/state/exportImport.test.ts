@@ -16,5 +16,14 @@ describe('export/import', () => {
     expect(() =>
       parseProfileExport('{"format":"ear-trainer-profile","version":1,"profile":{}}'),
     ).toThrow(/invalid profile file/)
+    expect(() =>
+      parseProfileExport(
+        JSON.stringify({
+          format: 'ear-trainer-profile',
+          version: 1,
+          profile: { ...makeProfile(), settings: null },
+        }),
+      ),
+    ).toThrow(/invalid profile file/)
   })
 })

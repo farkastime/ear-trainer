@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { mulberry32 } from '../core/engine/rng'
 import { makeProfile } from '../core/testing/fixtures'
 import { onEngineEvent } from './eventBus'
@@ -55,6 +55,13 @@ describe('profiles', () => {
 })
 
 describe('session actions', () => {
+  it('does not navigate to session when there is no active profile', () => {
+    const { store } = makeStore()
+    store.getState().startSession()
+    expect(store.getState().screen).toBe('profiles')
+    expect(store.getState().session).toBeNull()
+  })
+
   it('runs a session through the engine, emits events and navigates', () => {
     const { store } = makeStore()
     const seen: string[] = []
@@ -84,11 +91,9 @@ describe('session actions', () => {
   it('queues the primer after a level-up and clears it', () => {
     const { store } = makeStore()
     store.getState().createProfile('Ada', '🐱')
-    store
-      .getState()
-      .updateSettings({
-        pacingParams: { streakTarget: 3, eguchiWindow: 40, eguchiDays: 14, eguchiSessions: 10 },
-      })
+    store.getState().updateSettings({
+      pacingParams: { streakTarget: 3, eguchiWindow: 40, eguchiDays: 14, eguchiSessions: 10 },
+    })
     store.getState().startSession()
     let guard = 0
     while (store.getState().session?.phase !== 'levelUp' && guard++ < 20) {
@@ -196,12 +201,12 @@ describe('persistence', () => {
 describe('write failures', () => {
   it('sets a notice when storage writes fail', () => {
     const backing = createMemoryStorage()
+    const { store } = makeStore(backing)
+    store.getState().createProfile('Ada', '🐱')
     backing.setItem = () => {
       throw new Error('quota')
     }
-    const { store } = makeStore(backing)
-    store.getState().createProfile('Ada', '🐱')
+    store.getState().updateSettings({ sessionTarget: 30 })
     expect(store.getState().storageNotice).toBe('writeFailed')
-    vi.restoreAllMocks()
   })
 })

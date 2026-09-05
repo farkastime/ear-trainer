@@ -53,8 +53,17 @@ export function createAppStore(deps: StoreDeps) {
   const store = create<AppState>()(
     persist(
       (set, get) => {
+        /** Wraps `set` so any write that fails to persist surfaces the notice. */
+        const write: (partial: Partial<AppState> | ((s: AppState) => Partial<AppState>)) => void = (
+          ...args
+        ) => {
+          set(...args)
+          if (deps.storage.writeFailed && get().storageNotice === null)
+            set({ storageNotice: 'writeFailed' })
+        }
+
         const withActive = (fn: (p: Profile) => Profile) =>
-          set((s) => ({
+          write((s) => ({
             profiles: s.profiles.map((p) => (p.id === s.activeProfileId ? fn(p) : p)),
           }))
 
@@ -81,10 +90,8 @@ export function createAppStore(deps: StoreDeps) {
             (e): e is Extract<EngineEvent, { type: 'chordWoken' }> => e.type === 'chordWoken',
           )
           if (woken) patch.pendingPrimer = [woken.chordId]
-          set(patch)
+          write(patch)
           emitEngineEvents(result.events)
-          if (deps.storage.writeFailed && get().storageNotice === null)
-            set({ storageNotice: 'writeFailed' })
         }
 
         const engineDeps = () => ({ now: deps.now(), rng: deps.rng })
@@ -99,17 +106,16 @@ export function createAppStore(deps: StoreDeps) {
 
           createProfile: (name, avatarEmoji) => {
             const profile = newProfile(name, avatarEmoji, deps.now(), deps.uuid())
-            set((s) => ({
+            write((s) => ({
               profiles: [...s.profiles, profile],
               activeProfileId: profile.id,
               screen: 'home',
             }))
-            if (deps.storage.writeFailed) set({ storageNotice: 'writeFailed' })
             return profile.id
           },
 
           deleteProfile: (id) =>
-            set((s) => {
+            write((s) => {
               const active = s.activeProfileId === id
               return {
                 profiles: s.profiles.filter((p) => p.id !== id),
@@ -120,14 +126,14 @@ export function createAppStore(deps: StoreDeps) {
             }),
 
           selectProfile: (id) =>
-            set({ activeProfileId: id, session: null, screen: id ? 'home' : 'profiles' }),
+            write({ activeProfileId: id, session: null, screen: id ? 'home' : 'profiles' }),
 
           updateSettings: (patch) =>
             withActive((p) => ({ ...p, settings: clampSettings({ ...p.settings, ...patch }) })),
 
           startSession: () => {
             apply((profile) => engine.startSession(profile, engineDeps()))
-            set({ screen: 'session', pendingPrimer: null })
+            if (get().session) write({ screen: 'session', pendingPrimer: null })
           },
 
           answer: (chordId) =>
@@ -146,7 +152,7 @@ export function createAppStore(deps: StoreDeps) {
             )
             const profile = activeProfile(get())
             if (profile && get().session?.phase === 'question') {
-              set({ pendingPrimer: awakeChordIds(profile.progression) })
+              write({ pendingPrimer: awakeChordIds(profile.progression) })
             }
           },
 
@@ -155,7 +161,7 @@ export function createAppStore(deps: StoreDeps) {
               session ? engine.endSession(profile, session, engineDeps()) : null,
             ),
 
-          clearPrimer: () => set({ pendingPrimer: null }),
+          clearPrimer: () => write({ pendingPrimer: null }),
 
           parentUnlockNext: () =>
             withActive((p) => {
@@ -204,7 +210,7 @@ export function createAppStore(deps: StoreDeps) {
 
           importProfile: (json) => {
             const imported = parseProfileExport(json)
-            set((s) => {
+            write((s) => {
               const taken = new Set(s.profiles.map((p) => p.id))
               const id = taken.has(imported.id) ? deps.uuid() : imported.id
               return {

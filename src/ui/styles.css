@@ -525,8 +525,9 @@ button {
   position: relative;
   z-index: 1;
 }
+/* Clears the fixed Stop button (top inset + 40px) so the trail starts below it. */
 .session {
-  padding-top: 64px;
+  padding-top: calc(max(10px, env(safe-area-inset-top)) + 54px);
 }
 .throb {
   animation: throb 0.45s ease-in-out infinite alternate;

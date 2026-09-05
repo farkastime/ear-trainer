@@ -20,7 +20,7 @@ describe('Session', () => {
     useAppStore.getState().parentUnlockNext()
     useAppStore.getState().startSession()
     const { services } = renderApp(<Session />)
-    const tiles = screen.getAllByTestId(/^tile-/)
+    const tiles = screen.getAllByTestId(/^tile-(?!grid$)/)
     expect(tiles.map((t) => t.dataset.chord)).toEqual(['red', 'yellow', 'blue'])
     expect(tile('red')).toHaveStyle({ '--tile-color': '#e53935' })
     expect(screen.getByTestId('tile-grid').dataset.cols).toBe('2')

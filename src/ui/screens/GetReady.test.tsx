@@ -30,7 +30,7 @@ describe('GetReady', () => {
     expect(player.loaded).toEqual(['piano'])
     expect(useAppStore.getState().session).toBeNull()
     await flush(MIN_RITUAL_MS)
-    expect(screen.getByText(/listen/i)).toBeInTheDocument()
+    expect(screen.getByText(/get ready!/i)).toBeInTheDocument()
     await flush(LISTEN_MS)
     expect(useAppStore.getState().session?.phase).toBe('question')
     expect(useAppStore.getState().screen).toBe('session')

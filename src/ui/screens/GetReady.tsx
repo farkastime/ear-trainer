@@ -117,7 +117,7 @@ export function GetReady() {
           </button>
         </>
       ) : stage === 'listen' ? (
-        <p className="listen">👂 Listen!</p>
+        <p className="listen">👂 Get Ready!</p>
       ) : (
         <>
           <CharacterParade chordIds={unlockedChordIds(profile.progression.unlocks)} />

@@ -147,7 +147,7 @@ selectable in parent settings. There is no unlock gating in v1.
 1. Child taps **Play** on the profile home. First tap starts the audio
    context (required by iOS).
 2. **Get-ready ritual** (§5.3): the child's characters parade in while
-   samples load, then a "Listen!" cue, then the first chord.
+   samples load, then a "Get Ready!" cue, then the first chord.
 3. The app plays a chord for 1.5–2.5 s (randomized).
 4. Tiles for every **unlocked** chord are shown in fixed curriculum order.
    Each tile shows the chord color and character emoji. Letters are off by
@@ -192,7 +192,7 @@ Loading is a moment, not a spinner. After Play:
 2. If the browser will not start audio without a gesture (typically after a
    reload mid-session), a "Tap to start" button appears after 1 s and the
    ritual continues from the tap.
-3. When loading is done and at least 1.5 s have passed, a "Listen!" cue
+3. When loading is done and at least 1.5 s have passed, a "Get Ready!" cue
    appears with a pulsing ear emoji and three quick unpitched taps
    ("t-t-tap").
 4. The first chord plays.
@@ -452,7 +452,7 @@ flames; the heat vignette still shifts color). Celebration sound has its own on/
    character is earned. A napping chord is shown asleep. Big Play below the
    grid enters the ritual and the session; stopping a session records it
    and returns via the summary, so Home and a live session never coexist.
-3. **Get-ready** — character parade and "Listen!" cue (§5.3).
+3. **Get-ready** — character parade and "Get Ready!" cue (§5.3).
 4. **Session** — chord tiles (emoji filling half the tile), ambient heat
    vignette, listening cue, progress trail, hear-again; a small Stop pinned
    to the top-left corner of the screen.

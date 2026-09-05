@@ -169,4 +169,10 @@ describe('clampPacingParams', () => {
     ).toEqual({ streakTarget: 3, eguchiWindow: 200, eguchiDays: 0, eguchiSessions: 100 })
     expect(clampPacingParams(DEFAULT_PACING_PARAMS)).toEqual(DEFAULT_PACING_PARAMS)
   })
+
+  it('falls back to defaults for non-finite values', () => {
+    expect(
+      clampPacingParams({ ...DEFAULT_PACING_PARAMS, streakTarget: NaN, eguchiDays: Infinity }),
+    ).toEqual(DEFAULT_PACING_PARAMS)
+  })
 })

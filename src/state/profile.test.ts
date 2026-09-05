@@ -29,5 +29,6 @@ describe('newProfile', () => {
     expect(s.sessionTarget).toBe(50)
     expect(s.pacingParams.streakTarget).toBe(3)
     expect(clampSettings({ ...DEFAULT_SETTINGS, sessionTarget: 4 }).sessionTarget).toBe(10)
+    expect(clampSettings({ ...DEFAULT_SETTINGS, sessionTarget: NaN }).sessionTarget).toBe(20)
   })
 })

@@ -25,7 +25,8 @@ export function clampPacingParams(params: PacingParams): PacingParams {
   const out = { ...params }
   for (const key of Object.keys(PACING_LIMITS) as (keyof PacingParams)[]) {
     const [min, max] = PACING_LIMITS[key]
-    out[key] = Math.min(max, Math.max(min, Math.round(params[key])))
+    const value = Number.isFinite(params[key]) ? params[key] : DEFAULT_PACING_PARAMS[key]
+    out[key] = Math.min(max, Math.max(min, Math.round(value)))
   }
   return out
 }

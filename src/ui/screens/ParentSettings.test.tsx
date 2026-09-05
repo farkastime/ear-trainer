@@ -38,6 +38,8 @@ describe('ParentSettings', () => {
     expect(s.pacingParams.eguchiDays).toBe(7)
     expect(s.sessionTarget).toBe(30)
     expect(s.instrumentId).toBe('harp')
+    fireEvent.change(screen.getByLabelText(/questions per session/i), { target: { value: '' } })
+    expect(activeProfile(useAppStore.getState())!.settings.sessionTarget).toBe(30)
   })
 
   it('unlocks, wakes, rewinds and resets with confirmation', () => {

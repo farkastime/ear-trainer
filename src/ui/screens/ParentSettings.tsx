@@ -40,8 +40,10 @@ function SettingsBody() {
   if (!profile) return null
   const { settings, progression } = profile
 
-  const setParam = (key: keyof PacingParams, raw: string) =>
+  const setParam = (key: keyof PacingParams, raw: string) => {
+    if (raw === '') return
     updateSettings({ pacingParams: { ...settings.pacingParams, [key]: Number(raw) } })
+  }
 
   const numberField = (label: string, key: keyof PacingParams) => (
     <label>
@@ -113,7 +115,10 @@ function SettingsBody() {
             min={SESSION_TARGET_LIMITS[0]}
             max={SESSION_TARGET_LIMITS[1]}
             value={settings.sessionTarget}
-            onChange={(e) => updateSettings({ sessionTarget: Number(e.target.value) })}
+            onChange={(e) => {
+              if (e.target.value === '') return
+              updateSettings({ sessionTarget: Number(e.target.value) })
+            }}
           />
         </label>
         {progression.readyForUnlock && <p className="badge">Ready to unlock</p>}

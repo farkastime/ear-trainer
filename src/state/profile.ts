@@ -18,9 +18,12 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
 
 export function clampSettings(settings: ProfileSettings): ProfileSettings {
   const [min, max] = SESSION_TARGET_LIMITS
+  const sessionTarget = Number.isFinite(settings.sessionTarget)
+    ? settings.sessionTarget
+    : DEFAULT_SETTINGS.sessionTarget
   return {
     ...settings,
-    sessionTarget: Math.min(max, Math.max(min, Math.round(settings.sessionTarget))),
+    sessionTarget: Math.min(max, Math.max(min, Math.round(sessionTarget))),
     pacingParams: clampPacingParams(settings.pacingParams),
   }
 }

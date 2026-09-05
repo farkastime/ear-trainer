@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { Component, useEffect, type ReactNode } from 'react'
 import { CelebrationLayer } from '../celebrations/CelebrationLayer'
 import { download } from '../state/exportImport'
 import { useAppStore } from '../state/store'
@@ -10,6 +10,29 @@ import { ParentSettings } from './screens/ParentSettings'
 import { ProfilePicker } from './screens/ProfilePicker'
 import { Session } from './screens/Session'
 import { Summary } from './screens/Summary'
+
+/** A render error must never leave a child staring at a blank page. */
+export class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false }
+  static getDerivedStateFromError() {
+    return { failed: true }
+  }
+  componentDidCatch(error: unknown) {
+    console.error('ui crashed', error)
+  }
+  render() {
+    if (!this.state.failed) return this.props.children
+    return (
+      <div className="screen center" data-testid="crashed" style={{ justifyContent: 'center' }}>
+        <p style={{ fontSize: '3rem' }}>🙈</p>
+        <p>Something went wrong.</p>
+        <button className="big-button" onClick={() => window.location.reload()}>
+          Start again
+        </button>
+      </div>
+    )
+  }
+}
 
 function StorageNotice() {
   const notice = useAppStore((s) => s.storageNotice)
@@ -55,7 +78,7 @@ export function App() {
   }, [])
 
   return (
-    <>
+    <ErrorBoundary>
       <StorageNotice />
       {screen === 'profiles' && <ProfilePicker />}
       {screen === 'home' && <Home />}
@@ -65,6 +88,6 @@ export function App() {
       {screen === 'summary' && <Summary />}
       {screen === 'parent' && <ParentSettings />}
       <CelebrationLayer />
-    </>
+    </ErrorBoundary>
   )
 }

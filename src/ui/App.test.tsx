@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as exportImport from '../state/exportImport'
 import { BACKUP_KEY } from '../state/storage'
 import { useAppStore } from '../state/store'
-import { App } from './App'
+import { App, ErrorBoundary } from './App'
 import { renderApp, resetStore } from './testing'
 
 beforeEach(() => {
@@ -12,6 +12,23 @@ beforeEach(() => {
   resetStore()
 })
 afterEach(() => vi.restoreAllMocks())
+
+describe('ErrorBoundary', () => {
+  it('shows a restart screen instead of a blank page when a child throws', () => {
+    const Boom = () => {
+      throw new Error('boom')
+    }
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    renderApp(
+      <ErrorBoundary>
+        <Boom />
+      </ErrorBoundary>,
+    )
+    expect(screen.getByTestId('crashed')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /start again/i })).toBeInTheDocument()
+    errSpy.mockRestore()
+  })
+})
 
 describe('App', () => {
   it('shows the profile picker when there are no profiles and creates one', () => {

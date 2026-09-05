@@ -1,5 +1,7 @@
 import * as Tone from 'tone'
 
+const MIN_GAP_S = 0.005
+
 export interface Sfx {
   whoosh(): void
   pop(): void
@@ -28,6 +30,7 @@ export function createToneSfx(): Sfx {
   let metal: Tone.MetalSynth | null = null
   let drum: Tone.MembraneSynth | null = null
   let filter: Tone.Filter | null = null
+  const lastStart: Record<string, number> = {}
 
   function ensure() {
     if (noise) return
@@ -51,40 +54,59 @@ export function createToneSfx(): Sfx {
     drum.volume.value = -6
   }
 
+  // Tone sources throw if started at or before their previous start time, so
+  // each synth's start times are kept strictly increasing.
+  function at(key: string, offset = 0): number {
+    const t = Math.max(Tone.now() + offset, (lastStart[key] ?? -Infinity) + MIN_GAP_S)
+    lastStart[key] = t
+    return t
+  }
+
+  // A celebration sound must never take the app down with it.
+  function safely(fn: () => void) {
+    try {
+      ensure()
+      fn()
+    } catch (err) {
+      console.warn('sfx skipped', err)
+    }
+  }
+
   return {
     whoosh() {
-      ensure()
-      filter!.frequency.rampTo(3000, 0.25)
-      noise!.envelope.decay = 0.35
-      noise!.triggerAttackRelease(0.3)
+      safely(() => {
+        filter!.frequency.rampTo(3000, 0.25)
+        noise!.envelope.decay = 0.35
+        noise!.triggerAttackRelease(0.3, at('noise'))
+      })
     },
     pop() {
-      ensure()
-      filter!.frequency.value = 2500
-      noise!.envelope.decay = 0.08
-      noise!.triggerAttackRelease(0.05)
+      safely(() => {
+        filter!.frequency.value = 2500
+        noise!.envelope.decay = 0.08
+        noise!.triggerAttackRelease(0.05, at('noise'))
+      })
     },
     thud() {
-      ensure()
-      drum!.triggerAttackRelease('C1', 0.2)
+      safely(() => drum!.triggerAttackRelease('C1', 0.2, at('drum')))
     },
     cymbal() {
-      ensure()
-      metal!.triggerAttackRelease('C3', 0.5)
+      safely(() => metal!.triggerAttackRelease('C3', 0.5, at('metal')))
     },
     steam() {
-      ensure()
-      filter!.frequency.value = 800
-      noise!.envelope.decay = 0.9
-      noise!.triggerAttackRelease(0.8)
+      safely(() => {
+        filter!.frequency.value = 800
+        noise!.envelope.decay = 0.9
+        noise!.triggerAttackRelease(0.8, at('noise'))
+      })
     },
     fanfare() {
-      ensure()
-      const t = Tone.now()
-      drum!.triggerAttackRelease('C1', 0.2, t)
-      drum!.triggerAttackRelease('C1', 0.2, t + 0.18)
-      drum!.triggerAttackRelease('C1', 0.3, t + 0.36)
-      metal!.triggerAttackRelease('C3', 0.8, t + 0.36)
+      safely(() => {
+        drum!.triggerAttackRelease('C1', 0.2, at('drum'))
+        drum!.triggerAttackRelease('C1', 0.2, at('drum', 0.18))
+        drum!.triggerAttackRelease('C1', 0.3, at('drum', 0.36))
+        metal!.triggerAttackRelease('C3', 0.8, at('metal', 0.36))
+      })
     },
   }
 }

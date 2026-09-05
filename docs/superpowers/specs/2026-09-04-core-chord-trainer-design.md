@@ -432,7 +432,7 @@ grid is 2 columns up to 4 chords, 3 columns up to 9, 4 columns beyond.
 | Failure | Behaviour |
 |---|---|
 | Sample load fails | retry twice with backoff; fall back to piano; if piano also fails show a "can't load sounds" screen with retry |
-| Audio context suspended | resume on next user tap; a muted-speaker hint appears if playback produces no output twice |
+| Audio context suspended | resume on next user tap; no output detection in v1 (a muted device gives no in-app hint) |
 | Corrupt or unknown-version persisted state | copy raw value to a backup key, reset to defaults, show a one-time notice with export of the backup |
 | Storage write fails | keep running in memory, show a non-blocking warning in parent settings |
 | Reduced-motion or low-end device | intensity clamps to `calm`; particle cap lowers when frame time exceeds 32 ms for 30 frames |

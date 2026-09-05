@@ -104,11 +104,13 @@ describe('session actions', () => {
     expect(store.getState().session?.phase).toBe('levelUp')
     store.getState().continueAfterLevelUp()
     expect(store.getState().pendingPrimer).toBeNull()
-    expect(store.getState().session?.phase).toBe('question')
-    // A fresh session began; the level-up session was recorded without a summary screen.
+    // The level-up session was recorded without a summary screen; get-ready starts the next.
+    expect(store.getState().session).toBeNull()
+    expect(store.getState().screen).toBe('getReady')
+    expect(activeProfile(store.getState())?.progression.sessions).toHaveLength(1)
+    store.getState().startSession()
     expect(store.getState().session?.answers).toHaveLength(0)
     expect(store.getState().screen).toBe('session')
-    expect(activeProfile(store.getState())?.progression.sessions).toHaveLength(1)
   })
 
   it('queues the wake primer until after the feedback for the waking answer', () => {

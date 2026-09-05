@@ -56,7 +56,8 @@ describe('LevelUp', () => {
     expect(player.played).toHaveLength(4)
 
     fireEvent.click(screen.getByRole('button', { name: /continue/i }))
-    expect(useAppStore.getState().session?.phase).toBe('question')
+    expect(useAppStore.getState().session).toBeNull()
+    expect(useAppStore.getState().screen).toBe('getReady')
     expect(useAppStore.getState().pendingPrimer).toBeNull()
   })
 

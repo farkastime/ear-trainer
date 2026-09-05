@@ -162,10 +162,14 @@ export function createAppStore(deps: StoreDeps) {
             }
           },
 
-          continueAfterLevelUp: () =>
+          continueAfterLevelUp: () => {
+            if (get().session?.phase !== 'levelUp') return
             apply((profile, session) =>
               session ? engine.continueAfterLevelUp(profile, session, engineDeps()) : null,
-            ),
+            )
+            // The old session is recorded; get-ready shows the new grid and starts a fresh one.
+            write({ session: null, screen: 'getReady', pendingPrimer: null, queuedPrimer: null })
+          },
 
           endSession: () =>
             apply((profile, session) =>

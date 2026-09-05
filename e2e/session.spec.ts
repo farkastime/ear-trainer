@@ -44,8 +44,8 @@ test('a child can complete a session and level up', async ({ page }) => {
     if (s.phase === 'levelUp') {
       leveledUp = true
       await page.getByRole('button', { name: 'Continue' }).click()
-      // Continue rolls into a fresh session; a perfect player would level up
-      // forever, so answer a few more and stop to reach the summary.
+      // Continue runs the get-ready ritual into a fresh session; a perfect player
+      // would level up forever, so answer a few more and stop to reach the summary.
       for (let i = 0; i < 3; i++) {
         await page.waitForFunction(
           () => window.__earTrainer.getState().session?.phase === 'question',

@@ -175,8 +175,8 @@ selectable in parent settings. There is no unlock gating in v1.
    as a green disc with a checkmark that flies in; a miss leaves a hollow
    red ring.
 8. If the pacing policy fires during the session, the level-up moment
-   (§6.3) runs immediately and the session then continues with the new
-   chord live.
+   (§6.3) runs immediately; Continue then goes through get-ready with the
+   new grid into a fresh session.
 9. **Overtime** (Unlimited pacing only): if the last trial at the target
    is correct but did not fire a level-up, an "Overtime!" pop and rainbow
    cannon fire and the session keeps asking until the streak reaches N
@@ -316,16 +316,15 @@ When the policy says ready, the unlock happens immediately, mid-session:
    ("Meet Owl!") at peak brightness, 2.2 s in. Once revealed, its chord
    plays three times (1.1 s apart), well after the jingle has ended; tapping
    the tile plays it again. Continue is enabled once revealed.
-4. A **Continue** tap returns to the session screen with the new tile added
-   in curriculum position, bouncing and glowing.
-5. **Continue** closes the interrupted session quietly (it is recorded with
-   its stars and its level-up, but no summary screen is shown, since the
-   takeover was the celebration) and starts a fresh full session with the
-   new chord live. A late unlock is therefore never cut short by the old
-   session's target. There is no run-through of the whole set, which added
-   noise without adding clarity. The new chord becomes the most recently
-   unlocked chord for weighting; the streak starts at 0 so the next unlock
-   is earned fresh.
+4. **Continue** closes the interrupted session quietly (it is recorded with
+   its stars and its level-up, but no summary screen and no session-end
+   celebration, since the takeover was the celebration) and goes to the
+   get-ready ritual (§5.3), whose grid now includes the new tile and whose
+   run-through plays every chord including the new one.
+5. The ritual starts a fresh full session with the new chord live, so a late
+   unlock is never cut short by the old session's target. The new chord
+   becomes the most recently unlocked chord for weighting; the streak starts
+   at 0 so the next unlock is earned fresh.
 
 ### 6.4 Stepping back
 

@@ -187,11 +187,11 @@ describe('level up', () => {
     expect(session.workingSet.size).toBe(3)
 
     const cont = continueAfterLevelUp(profile, session, deps(5000))
-    expect(cont.session.phase).toBe('question')
-    expect(cont.session.answers).toHaveLength(0)
-    expect(cont.session.startedAt).toBe(5000)
-    expect(types(cont.events)).toEqual(['sessionStarted', 'questionAsked'])
-    expect(workingSetIds(cont.progression, cont.session)).toEqual(['red', 'yellow', 'blue'])
+    expect(cont.session.phase).toBe('summary')
+    expect(cont.events).toEqual([])
+    const next = startSession({ ...profile, progression: cont.progression }, deps(6000))
+    expect(next.session.answers).toHaveLength(0)
+    expect(workingSetIds(next.progression, next.session)).toEqual(['red', 'yellow', 'blue'])
     // The interrupted session is recorded, with its level-up, but no summary is shown.
     expect(cont.progression.sessions).toHaveLength(1)
     expect(cont.progression.sessions[0]).toMatchObject({
@@ -201,12 +201,11 @@ describe('level up', () => {
     })
   })
 
-  it('rolls into a fresh session even when the target was reached at the level-up', () => {
+  it('records the session as complete when the target was reached at the level-up', () => {
     const { profile, session } = runUntilLevelUp(makeProfile({ settings: { sessionTarget: 10 } }))
     expect(session.phase).toBe('levelUp')
     const cont = continueAfterLevelUp(profile, session, deps(5000))
-    expect(cont.session.phase).toBe('question')
-    expect(cont.session.answers).toHaveLength(0)
+    expect(cont.session.phase).toBe('summary')
     expect(cont.progression.sessions[0]).toMatchObject({ leveledUp: true, countsForPacing: true })
   })
 

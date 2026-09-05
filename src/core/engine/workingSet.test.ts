@@ -70,4 +70,12 @@ describe('updateWorkingSet', () => {
     expect(ws.widenStreak).toBe(0)
     expect(ws.size).toBe(2)
   })
+
+  it('a correct answer never narrows, even with poor window accuracy', () => {
+    let ws: WorkingSet = { size: 2, widenStreak: 2, lastNarrowedAtCount: -Infinity }
+    const answers = [a(false), a(false), a(false), a(false), a(false), a(true), a(true), a(true)]
+    ws = updateWorkingSet(ws, 8, answers)
+    expect(ws.size).toBe(3)
+    expect(ws.lastNarrowedAtCount).toBe(-Infinity)
+  })
 })

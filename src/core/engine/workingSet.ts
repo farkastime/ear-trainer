@@ -46,7 +46,12 @@ export function updateWorkingSet(
   const count = sessionAnswers.length
   const windowAccuracy = accuracy(lastN(sessionAnswers, NARROW_WINDOW))
   const cooledDown = count - lastNarrowedAtCount >= NARROW_WINDOW
-  if (count >= NARROW_MIN_ANSWERS && windowAccuracy < NARROW_THRESHOLD && cooledDown) {
+  if (
+    !last.correct &&
+    count >= NARROW_MIN_ANSWERS &&
+    windowAccuracy < NARROW_THRESHOLD &&
+    cooledDown
+  ) {
     size = Math.max(MIN_WORKING_SET, Math.floor(size / 2))
     lastNarrowedAtCount = count
   }

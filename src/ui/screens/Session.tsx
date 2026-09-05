@@ -13,9 +13,10 @@ import { StreakBadge } from '../components/StreakBadge'
 import { TileGrid } from '../components/TileGrid'
 import { usePrimer } from '../hooks/usePrimer'
 
-export const FEEDBACK_MS = 1000
+// Feedback must outlast the confirmation replay so the next question starts in silence.
+export const CONFIRM_SECONDS = 1.5
+export const FEEDBACK_MS = CONFIRM_SECONDS * 1000 + 700
 const QUESTION_DELAY_MS = 150
-const CONFIRM_SECONDS = 1.5
 const PRIMER_SECONDS = 1.2
 
 export function Session() {
@@ -33,6 +34,7 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
   const clearPrimer = useAppStore((s) => s.clearPrimer)
   const { player } = useAudio()
   const [lastChosen, setLastChosen] = useState<string | null>(null)
+  const [listening, setListening] = useState(false)
   const primerReplayTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const play = (chordId: string, seconds: number) =>
@@ -60,8 +62,18 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
   useEffect(() => {
     if (session.phase !== 'question' || !session.currentChordId || pendingPrimer) return
     const id = session.currentChordId
-    const t = setTimeout(() => play(id, randomDuration(Math.random)), QUESTION_DELAY_MS)
-    return () => clearTimeout(t)
+    let done: ReturnType<typeof setTimeout> | undefined
+    const t = setTimeout(() => {
+      const seconds = randomDuration(Math.random)
+      play(id, seconds)
+      setListening(true)
+      done = setTimeout(() => setListening(false), seconds * 1000)
+    }, QUESTION_DELAY_MS)
+    return () => {
+      clearTimeout(t)
+      if (done) clearTimeout(done)
+      setListening(false)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session.phase, session.currentChordId, session.answers.length, pendingPrimer])
 
@@ -105,7 +117,13 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
         <button className="icon-button" aria-label="Stop" onClick={endSession}>
           ✕
         </button>
-        <div className="grow" />
+        <div className="grow center">
+          {listening && (
+            <span className="listening" data-testid="listening" aria-label="Listen">
+              👂
+            </span>
+          )}
+        </div>
         <button
           className="icon-button"
           aria-label="Hear it again"

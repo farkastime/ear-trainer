@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { chordById } from '../../core/content/chords'
 import { activeProfile, useAppStore } from '../../state/store'
 import { renderApp, resetStore } from '../testing'
-import { FEEDBACK_MS, Session } from './Session'
+import { CONFIRM_SECONDS, FEEDBACK_MS, Session } from './Session'
 
 beforeEach(() => {
   vi.useFakeTimers()
@@ -88,6 +88,31 @@ describe('Session', () => {
     fireEvent.click(tile(current()))
     fireEvent.click(tile(current()))
     expect(useAppStore.getState().session!.answers).toHaveLength(1)
+  })
+
+  it('waits for the confirmation replay to finish, plus a pause, before the next question', () => {
+    useAppStore.getState().startSession()
+    renderApp(<Session />)
+    act(() => vi.advanceTimersByTime(200))
+    fireEvent.click(tile(current()))
+    expect(useAppStore.getState().session!.phase).toBe('feedback')
+    act(() => vi.advanceTimersByTime(CONFIRM_SECONDS * 1000))
+    expect(useAppStore.getState().session!.phase).toBe('feedback')
+    act(() => vi.advanceTimersByTime(FEEDBACK_MS - CONFIRM_SECONDS * 1000))
+    expect(useAppStore.getState().session!.phase).toBe('question')
+    expect(FEEDBACK_MS).toBeGreaterThanOrEqual(CONFIRM_SECONDS * 1000 + 500)
+  })
+
+  it('shows a listening cue while the question chord plays, and not during feedback', () => {
+    useAppStore.getState().startSession()
+    renderApp(<Session />)
+    expect(screen.queryByTestId('listening')).toBeNull()
+    act(() => vi.advanceTimersByTime(200))
+    expect(screen.getByTestId('listening')).toBeInTheDocument()
+    act(() => vi.advanceTimersByTime(2600))
+    expect(screen.queryByTestId('listening')).toBeNull()
+    fireEvent.click(tile(current()))
+    expect(screen.queryByTestId('listening')).toBeNull()
   })
 
   it('hear again replays, stop ends the session', () => {

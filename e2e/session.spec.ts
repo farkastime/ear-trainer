@@ -30,7 +30,8 @@ test('a child can complete a session and level up', async ({ page }) => {
   await expect(page.getByTestId('screen-session')).toBeVisible({ timeout: 20_000 })
 
   let leveledUp = false
-  for (let i = 0; i < 60; i++) {
+  const deadline = Date.now() + 100_000
+  while (Date.now() < deadline) {
     const s = await page.evaluate(() => {
       const st = window.__earTrainer.getState()
       return {
@@ -51,7 +52,12 @@ test('a child can complete a session and level up', async ({ page }) => {
       continue
     }
     await page.getByTestId(`tile-${s.current}`).click()
-    await page.waitForTimeout(1200)
+    // Feedback ends when the store leaves the feedback phase; poll that rather than a fixed delay.
+    await page.waitForFunction(
+      () => window.__earTrainer.getState().session?.phase !== 'feedback',
+      null,
+      { timeout: 10_000 },
+    )
   }
 
   await expect(page.getByTestId('screen-summary')).toBeVisible()

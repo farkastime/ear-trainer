@@ -404,6 +404,11 @@ button {
     opacity: 1;
   }
 }
+.listening {
+  display: inline-block;
+  font-size: 2rem;
+  animation: pulse 0.8s ease infinite;
+}
 .listen {
   font-size: 3rem;
   animation: pulse 1s ease infinite;

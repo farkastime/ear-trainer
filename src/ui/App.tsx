@@ -3,6 +3,7 @@ import { CelebrationLayer } from '../celebrations/CelebrationLayer'
 import { useAppStore } from '../state/store'
 import { GetReady } from './screens/GetReady'
 import { Home } from './screens/Home'
+import { LevelUp } from './screens/LevelUp'
 import { ParentSettings } from './screens/ParentSettings'
 import { ProfilePicker } from './screens/ProfilePicker'
 import { Session } from './screens/Session'
@@ -29,6 +30,7 @@ function StorageNotice() {
 export function App() {
   const screen = useAppStore((s) => s.screen)
   const goTo = useAppStore((s) => s.goTo)
+  const phase = useAppStore((s) => s.session?.phase)
 
   useEffect(() => {
     const { session, activeProfileId } = useAppStore.getState()
@@ -47,6 +49,7 @@ export function App() {
       {screen === 'home' && <Home />}
       {screen === 'getReady' && <GetReady />}
       {screen === 'session' && <Session />}
+      {screen === 'session' && phase === 'levelUp' && <LevelUp />}
       {screen === 'summary' && <Summary />}
       {screen === 'parent' && <ParentSettings />}
       <CelebrationLayer />

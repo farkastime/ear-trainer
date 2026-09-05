@@ -60,9 +60,9 @@ src/
 public/samples/<instrument>/   self-hosted audio samples
 ```
 
-The core emits typed events (`answered`, `streakMilestone`, `heatChanged`,
-`sessionComplete`, `levelUp`, `workingSetChanged`, `napChanged`,
-`chordWoken`). Audio and celebrations
+The core emits typed events (`sessionStarted`, `questionAsked`, `answered`,
+`streakMilestone`, `workingSetChanged`, `chordWoken`, `readyForUnlock`,
+`levelUp`, `chordNapped`, `sessionComplete`). Heat travels on `answered`. Audio and celebrations
 subscribe to events; the engine never references the DOM, canvas, or Tone.js.
 React renders from the store. This keeps progression rules — the part we will
 keep tuning — unit-testable without a browser.
@@ -242,7 +242,7 @@ needs a longer step back). The stats view shows the current working set and
 nap state.
 
 Working-set and nap changes are engine state emitted via
-`workingSetChanged` and `napChanged`.
+`workingSetChanged`, `chordNapped` and `chordWoken`.
 
 ## 6. Progression and pacing
 

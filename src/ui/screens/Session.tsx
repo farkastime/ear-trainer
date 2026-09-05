@@ -16,6 +16,7 @@ import { usePrimer } from '../hooks/usePrimer'
 // Feedback is visual plus a short sound; the chord is never replayed.
 export const FEEDBACK_CORRECT_MS = 1500
 export const FEEDBACK_WRONG_MS = 1800
+export const LEVELUP_LEAD_MS = 700
 export const QUESTION_DELAY_MS = 500
 export const MILESTONE_POP_MS = 2400
 const PRIMER_SECONDS = 1.2
@@ -98,7 +99,13 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
   useEffect(() => {
     if (session.phase !== 'feedback') return
     const last = session.answers[session.answers.length - 1]
-    const t = setTimeout(advance, last.correct ? FEEDBACK_CORRECT_MS : FEEDBACK_WRONG_MS)
+    // A pending level-up moves on as soon as the milestone chime ends, so the jingle follows it.
+    const wait = session.pendingLevelUp
+      ? LEVELUP_LEAD_MS
+      : last.correct
+        ? FEEDBACK_CORRECT_MS
+        : FEEDBACK_WRONG_MS
+    const t = setTimeout(advance, wait)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session.phase, session.answers.length])

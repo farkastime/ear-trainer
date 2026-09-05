@@ -9,6 +9,17 @@ export function noteToMidi(note: string): number {
   return (Number(m[3]) + 1) * 12 + BASE[m[1]] + acc
 }
 
+const NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+
+/** Sharps only; Tone accepts either spelling. */
+export function midiToNote(midi: number): string {
+  return `${NAMES[midi % 12]}${Math.floor(midi / 12) - 1}`
+}
+
+export function transpose(notes: readonly string[], semitones: number): string[] {
+  return notes.map((n) => midiToNote(noteToMidi(n) + semitones))
+}
+
 export function nearestSamples(instrument: Instrument, notes: string[]): Record<string, string> {
   const available = Object.keys(instrument.samples).map((n) => ({ n, midi: noteToMidi(n) }))
   const out: Record<string, string> = {}

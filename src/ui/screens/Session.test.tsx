@@ -6,6 +6,7 @@ import { renderApp, resetStore } from '../testing'
 import {
   FEEDBACK_CORRECT_MS,
   FEEDBACK_WRONG_MS,
+  LEVELUP_LEAD_MS,
   MILESTONE_POP_MS,
   QUESTION_DELAY_MS,
   Session,
@@ -164,6 +165,22 @@ describe('Session', () => {
     expect(screen.getByTestId('milestone-pop').textContent).toBe('5')
     act(() => vi.advanceTimersByTime(MILESTONE_POP_MS + 10))
     expect(screen.queryByTestId('milestone-pop')).toBeNull()
+  })
+
+  it('moves to the level-up as soon as the milestone chime ends', () => {
+    useAppStore.getState().updateSettings({
+      pacingParams: { streakTarget: 3, eguchiWindow: 40, eguchiDays: 14, eguchiSessions: 10 },
+    })
+    useAppStore.getState().startSession()
+    renderApp(<Session />)
+    for (let i = 0; i < 2; i++) {
+      fireEvent.click(tile(current()))
+      act(() => vi.advanceTimersByTime(FEEDBACK_CORRECT_MS))
+    }
+    fireEvent.click(tile(current()))
+    expect(useAppStore.getState().session!.pendingLevelUp).toBe('blue')
+    act(() => vi.advanceTimersByTime(LEVELUP_LEAD_MS))
+    expect(useAppStore.getState().session!.phase).toBe('levelUp')
   })
 
   it('runs the primer, highlighting tiles in turn and blocking taps', () => {

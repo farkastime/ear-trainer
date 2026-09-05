@@ -137,7 +137,7 @@ describe('answer and advance', () => {
       seen.push(...r.events)
     }
     expect(seen.filter((e) => e.type === 'streakMilestone')).toEqual([
-      { type: 'streakMilestone', streak: 5 },
+      { type: 'streakMilestone', streak: 5, chordId: expect.stringMatching(/^(red|yellow)$/) },
     ])
     expect(profile.progression.stars).toBe(1)
   })

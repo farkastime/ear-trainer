@@ -1,17 +1,21 @@
 import * as Tone from 'tone'
+import { transpose } from './notes'
 
 const MIN_GAP_S = 0.005
+const OCTAVE = 12
 
 export interface Sfx {
   whoosh(): void
   pop(): void
-  correct(): void
+  /** "ding-ding" built from the tapped chord, an octave up. */
+  correct(chordNotes: readonly string[]): void
   thud(): void
   cymbal(): void
   steam(): void
   wrong(): void
   listenCue(): void
-  milestone(): void
+  /** Three chimes: the tapped chord's notes an octave up, in order. */
+  milestone(chordNotes: readonly string[]): void
   fanfare(): void
   jingleLevelUp(): void
   jingleSessionEnd(): void
@@ -131,11 +135,12 @@ export function createToneSfx(): Sfx {
         noise!.triggerAttackRelease(0.05, at('noise'))
       })
     },
-    correct() {
-      // "ding-ding": two quick high bells, an octave above the chord vocabulary.
+    correct(chordNotes) {
+      // Lowest and highest chord notes an octave up, so each chord has its own ding-ding.
       safely(() => {
-        bell!.triggerAttackRelease('G6', 0.15, at('bell'))
-        bell!.triggerAttackRelease('C7', 0.25, at('bell', 0.12))
+        const up = transpose(chordNotes, OCTAVE)
+        bell!.triggerAttackRelease(up[0], 0.15, at('bell'))
+        bell!.triggerAttackRelease(up[up.length - 1], 0.25, at('bell', 0.12))
       })
     },
     thud() {
@@ -169,13 +174,11 @@ export function createToneSfx(): Sfx {
         noise!.triggerAttackRelease(0.12, at('noise', 0.52))
       })
     },
-    milestone() {
-      // "chick, chick": two quick taps; the special confetti carries the rest.
+    milestone(chordNotes) {
       safely(() => {
-        filter!.frequency.value = 2500
-        noise!.envelope.decay = 0.08
-        noise!.triggerAttackRelease(0.06, at('noise'))
-        noise!.triggerAttackRelease(0.06, at('noise', 0.16))
+        transpose(chordNotes, OCTAVE).forEach((note, i) =>
+          bell!.triggerAttackRelease(note, 0.3, at('bell', i * 0.13)),
+        )
       })
     },
     jingleLevelUp() {

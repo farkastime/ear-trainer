@@ -40,7 +40,9 @@ vi.mock('tone', () => {
     }
   }
   class Pitched extends FakeSynth {
-    triggerAttackRelease(_note: string, _duration: number, time?: number) {
+    notes: string[] = []
+    triggerAttackRelease(note: string, _duration: number, time?: number) {
+      this.notes.push(note)
       return this.record(time ?? now.value)
     }
   }
@@ -112,20 +114,27 @@ describe('createToneSfx', () => {
     expect(noise.starts[2] - noise.starts[0]).toBeCloseTo(0.52)
   })
 
-  it('a correct answer is two quick bells', () => {
+  it("a correct answer dings the chord's outer notes an octave up", () => {
     const sfx = createToneSfx()
-    sfx.correct()
-    const bell = synths.filter((s) => s.kind === 'blip')[1]
+    sfx.correct(['B3', 'D4', 'G4'])
+    const bell = synths.filter((s) => s.kind === 'blip')[1] as InstanceType<typeof FakeSynth> & {
+      notes: string[]
+    }
+    expect(bell.notes).toEqual(['B4', 'G5'])
     expect(bell.starts).toHaveLength(2)
     expect(bell.starts[1] - bell.starts[0]).toBeCloseTo(0.12)
     expect(by('noise').starts).toHaveLength(0)
   })
 
-  it('the milestone sound is two taps and nothing pitched', () => {
+  it('the milestone chime is the whole chord an octave up, in order', () => {
     const sfx = createToneSfx()
-    sfx.milestone()
-    expect(by('noise').starts).toHaveLength(2)
-    for (const s of synths.filter((s) => s.kind === 'blip')) expect(s.starts).toHaveLength(0)
+    sfx.milestone(['C4', 'E4', 'G4'])
+    const bell = synths.filter((s) => s.kind === 'blip')[1] as InstanceType<typeof FakeSynth> & {
+      notes: string[]
+    }
+    expect(bell.notes).toEqual(['C5', 'E5', 'G5'])
+    expect(bell.starts).toHaveLength(3)
+    expect(by('noise').starts).toHaveLength(0)
   })
 
   it('jingles play their notes in strictly increasing time on the bell synth', () => {

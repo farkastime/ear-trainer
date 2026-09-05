@@ -338,7 +338,7 @@ bigger than the last:
 | Tier | Trigger | Effect |
 |---|---|---|
 | 1 | every correct answer | one confetti cannon in the chord's colors from just above-left of the first tile (always on screen), lobbing up and right and drifting down; character bounce; ambient heat step |
-| 2 | streak milestone (every 5, configurable) | the same cannon, bigger and in rainbow colors; a big numeral (5, 10, 15…) pops to the centre, lingers about a second, then falls away with the confetti; "chick, chick" (two quick taps); ★ awarded, heat ignites further, haptic |
+| 2 | streak milestone (every 5, configurable) | the same cannon, bigger and in rainbow colors; a big numeral (5, 10, 15…) pops to the centre, lingers about a second, then falls away with the confetti; three chimes, the tapped chord's notes an octave up in order; ★ awarded, heat ignites further, haptic. When the milestone is also the unlock (streak 10 by default) the session moves to the level-up as the chime ends, so the jingle follows it directly. |
 | 3 | session complete | session summary (§7.3): confetti + fireworks, 1–3 stars by accuracy |
 | 4 | level up | full-screen takeover (§6.3) — the biggest effect in the app |
 
@@ -389,12 +389,14 @@ happened in this session the new character is featured on the card.
 
 Celebration sounds are **unpitched** by default (whoosh, pop, drum,
 cymbal): extra tones must not muddy the pitch exposure the app exists to
-deliver. Exceptions, each kept clear of the chord vocabulary (A3–E5): the
-chord itself; the correct-answer "ding-ding", two quick bells an octave
-above; the miss "bee-oop", a descending two-tone blip an octave
-below; and two short bell jingles an octave above, a rising one at level-up
-and a four-note tune at session end, so those moments have a signature the
-child recognises.
+deliver. Exceptions: the chord itself; the correct-answer "ding-ding" (the
+tapped chord's lowest and highest notes an octave up) and the milestone
+chime (the whole chord an octave up), which echo the chord just heard
+rather than adding a stray pitch, and give each chord its own sound; the
+miss "bee-oop", a descending two-tone blip an octave below the vocabulary;
+and two short bell jingles above it, a rising one at level-up and a
+four-note tune at session end, so those moments have a signature the child
+recognises.
 Haptics via `navigator.vibrate` where supported.
 
 ### 7.5 Intensity and accessibility

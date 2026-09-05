@@ -137,7 +137,7 @@ export function answer(
 
   if (correct && streak % MILESTONE_EVERY === 0) {
     progression = { ...progression, stars: progression.stars + 1 }
-    events.push({ type: 'streakMilestone', streak })
+    events.push({ type: 'streakMilestone', streak, chordId })
   }
 
   let awake = awakeChordIds(progression)

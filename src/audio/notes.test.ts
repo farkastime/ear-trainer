@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { instrumentById } from '../core/content/instruments'
-import { nearestSamples, noteToMidi } from './notes'
+import { midiToNote, nearestSamples, noteToMidi, transpose } from './notes'
 
 describe('noteToMidi', () => {
   it('converts scientific pitch names', () => {
@@ -9,6 +9,16 @@ describe('noteToMidi', () => {
     expect(noteToMidi('Bb3')).toBe(58)
     expect(noteToMidi('A0')).toBe(21)
     expect(() => noteToMidi('H4')).toThrow()
+  })
+})
+
+describe('midiToNote and transpose', () => {
+  it('round-trips and transposes by an octave', () => {
+    expect(midiToNote(60)).toBe('C4')
+    expect(midiToNote(61)).toBe('C#4')
+    expect(midiToNote(noteToMidi('Bb3'))).toBe('A#3')
+    expect(transpose(['C4', 'E4', 'G4'], 12)).toEqual(['C5', 'E5', 'G5'])
+    expect(transpose(['B3', 'D4', 'G4'], 12)).toEqual(['B4', 'D5', 'G5'])
   })
 })
 

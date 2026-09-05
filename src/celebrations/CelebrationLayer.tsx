@@ -61,7 +61,7 @@ export function CelebrationLayer({ system }: { system?: ParticleSystem }) {
           if (e.correct) {
             const o = origin()
             cannon(sys, o.x, o.y, palette(e.chordId), scale)
-            if (sound) sfx.correct()
+            if (sound) sfx.correct(chordById(e.chordId).notes)
             vibrate([20], haptics)
           } else if (sound) {
             sfx.wrong()
@@ -71,7 +71,7 @@ export function CelebrationLayer({ system }: { system?: ParticleSystem }) {
         case 'streakMilestone': {
           const o = origin()
           cannon(sys, o.x, o.y, CONFETTI_COLORS, scale * 1.6)
-          if (sound) sfx.milestone()
+          if (sound) sfx.milestone(chordById(e.chordId).notes)
           vibrate([30, 50, 30], haptics)
           break
         }

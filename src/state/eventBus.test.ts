@@ -7,7 +7,10 @@ describe('eventBus', () => {
     const b = vi.fn()
     const offA = onEngineEvent(a)
     onEngineEvent(b)
-    emitEngineEvents([{ type: 'readyForUnlock' }, { type: 'streakMilestone', streak: 5 }])
+    emitEngineEvents([
+      { type: 'readyForUnlock' },
+      { type: 'streakMilestone', streak: 5, chordId: 'red' },
+    ])
     expect(a.mock.calls.map((c) => c[0].type)).toEqual(['readyForUnlock', 'streakMilestone'])
     offA()
     emitEngineEvents([{ type: 'readyForUnlock' }])

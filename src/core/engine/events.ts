@@ -11,7 +11,7 @@ export type EngineEvent =
       streak: number
       heat: number
     }
-  | { type: 'streakMilestone'; streak: number }
+  | { type: 'streakMilestone'; streak: number; chordId: string }
   | { type: 'workingSetChanged'; size: number }
   | { type: 'chordWoken'; chordId: string }
   | { type: 'readyForUnlock' }

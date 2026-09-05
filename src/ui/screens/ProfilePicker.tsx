@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { AppHeader } from '../components/AppHeader'
 import { useAppStore } from '../../state/store'
 
 const AVATARS = ['🐱', '🐶', '🐰', '🦊', '🐼', '🐨', '🦄', '🐸']
@@ -27,7 +26,6 @@ export function ProfilePicker() {
 
   return (
     <div className="screen" data-screen="profiles" data-testid="screen-profiles">
-      <AppHeader />
       <h1 className="screen-title">Who's playing?</h1>
       {profiles.length > 0 && (
         <div className="profile-grid">

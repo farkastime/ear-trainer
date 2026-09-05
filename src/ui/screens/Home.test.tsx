@@ -19,7 +19,6 @@ describe('Home', () => {
     }))
     renderApp(<Home />)
     expect(screen.getByText(/hi, ada/i)).toBeInTheDocument()
-    expect(screen.getByText(/earbuddies/i)).toBeInTheDocument()
     expect(screen.getByText(/practice!/i)).toBeInTheDocument()
     expect(tiles().map((t) => t.dataset.chord)).toEqual(['red', 'yellow'])
     expect(screen.getByText('🦁')).toBeInTheDocument()

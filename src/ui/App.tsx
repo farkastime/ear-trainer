@@ -3,6 +3,7 @@ import { CelebrationLayer } from '../celebrations/CelebrationLayer'
 import { download } from '../state/exportImport'
 import { useAppStore } from '../state/store'
 import { BACKUP_KEY } from '../state/storage'
+import { AppHeader } from './components/AppHeader'
 import { GetReady } from './screens/GetReady'
 import { Home } from './screens/Home'
 import { LevelUp } from './screens/LevelUp'
@@ -79,6 +80,7 @@ export function App() {
 
   return (
     <ErrorBoundary>
+      <AppHeader />
       <StorageNotice />
       {screen === 'profiles' && <ProfilePicker />}
       {screen === 'home' && <Home />}

@@ -48,18 +48,26 @@ button {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  /* Clears the fixed app header and the session's Stop button (top inset + 40px). */
+  padding: calc(max(10px, env(safe-area-inset-top)) + 56px) 16px
+    max(16px, env(safe-area-inset-bottom));
   gap: 16px;
   position: relative;
 }
 .app-header {
+  position: fixed;
+  top: max(10px, env(safe-area-inset-top));
+  left: 0;
+  right: 0;
   margin: 0;
+  line-height: 40px;
   text-align: center;
   font-weight: 800;
-  font-size: 1.1rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  opacity: 0.75;
+  font-size: 1.5rem;
+  letter-spacing: 0.04em;
+  opacity: 0.85;
+  pointer-events: none;
+  z-index: 3;
 }
 .screen-title {
   font-size: 1.6rem;
@@ -533,10 +541,6 @@ button {
 .session > * {
   position: relative;
   z-index: 1;
-}
-/* Clears the fixed Stop button (top inset + 40px) so the trail starts below it. */
-.session {
-  padding-top: calc(max(10px, env(safe-area-inset-top)) + 54px);
 }
 .throb {
   animation: throb 0.45s ease-in-out infinite alternate;

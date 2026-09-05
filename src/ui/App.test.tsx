@@ -46,6 +46,7 @@ describe('App', () => {
     useAppStore.setState({ screen: 'profiles' })
     renderApp(<App />)
     expect(screen.getByTestId('screen-home')).toBeInTheDocument()
+    expect(screen.getByText(/earbuddies/i)).toBeInTheDocument()
   })
 
   it('resumes an unfinished session through get-ready', () => {

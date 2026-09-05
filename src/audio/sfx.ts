@@ -153,9 +153,9 @@ export function createToneSfx(): Sfx {
       safely(() => {
         filter!.frequency.value = 2500
         noise!.envelope.decay = 0.08
-        noise!.triggerAttackRelease(0.05, at('noise'))
-        noise!.triggerAttackRelease(0.05, at('noise', 0.13))
-        noise!.triggerAttackRelease(0.09, at('noise', 0.26))
+        noise!.triggerAttackRelease(0.06, at('noise'))
+        noise!.triggerAttackRelease(0.06, at('noise', 0.26))
+        noise!.triggerAttackRelease(0.12, at('noise', 0.52))
       })
     },
     jingleLevelUp() {

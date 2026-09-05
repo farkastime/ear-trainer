@@ -100,7 +100,6 @@ describe('answer and advance', () => {
     expect(a.progression.heat).toBeCloseTo(1 / 15)
     expect(a.progression.chordStats[asked]).toEqual({ attempts: 1, correct: 1 })
     expect(a.progression.recentAnswers).toEqual([{ chordId: asked, correct: true, at: 2000 }])
-    expect(a.session.streakChordIds).toEqual([asked])
     expect(a.events).toEqual([
       { type: 'answered', chordId: asked, chosenId: asked, correct: true, streak: 1, heat: 1 / 15 },
     ])
@@ -121,7 +120,6 @@ describe('answer and advance', () => {
     expect(a.progression.streak).toBe(0)
     expect(a.progression.heat).toBe(0)
     expect(a.progression.bestStreak).toBe(1)
-    expect(a.session.streakChordIds).toEqual([])
     expect(a.progression.recentAnswers.at(-1)).toEqual({ chordId: asked, correct: false, at: 3000 })
     expect(a.events[0]).toMatchObject({ type: 'answered', correct: false, chosenId: wrong })
   })
@@ -173,7 +171,7 @@ describe('level up', () => {
     return { profile, session, events }
   }
 
-  it('unlocks the next chord mid-session at a streak of 10 covering every awake chord', () => {
+  it('unlocks the next chord mid-session at a streak of 10', () => {
     const { profile, session, events } = runUntilLevelUp(makeProfile())
     expect(session.phase).toBe('levelUp')
     expect(session.answers.length).toBeGreaterThanOrEqual(10)

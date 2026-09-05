@@ -29,7 +29,6 @@ function input(over: Partial<PacingInput> = {}): PacingInput {
   return {
     progression: progression(),
     sessionStreak: 0,
-    streakChordIds: new Set(),
     awakeChordIds: ['red', 'yellow'],
     now: 0,
     ...over,
@@ -52,31 +51,17 @@ const session = (endedAt: number, countsForPacing = true): SessionSummary => ({
 
 describe('unlimited', () => {
   const unlimited = policyFor('unlimited')
-  it('is ready at the streak target when every awake chord was hit', () => {
-    const v = unlimited(
-      input({ sessionStreak: 10, streakChordIds: new Set(['red', 'yellow']) }),
-      DEFAULT_PACING_PARAMS,
-    )
+  it('is ready at the streak target', () => {
+    const v = unlimited(input({ sessionStreak: 10 }), DEFAULT_PACING_PARAMS)
     expect(v.ready).toBe(true)
   })
   it('is not ready below the target', () => {
-    const v = unlimited(
-      input({ sessionStreak: 9, streakChordIds: new Set(['red', 'yellow']) }),
-      DEFAULT_PACING_PARAMS,
-    )
+    const v = unlimited(input({ sessionStreak: 9 }), DEFAULT_PACING_PARAMS)
     expect(v.ready).toBe(false)
     expect(v.reason).toMatch(/9 of 10/)
   })
-  it('is not ready if some awake chord was never in the streak', () => {
-    const v = unlimited(
-      input({ sessionStreak: 12, streakChordIds: new Set(['red']) }),
-      DEFAULT_PACING_PARAMS,
-    )
-    expect(v.ready).toBe(false)
-    expect(v.reason).toMatch(/yellow/)
-  })
   it('honours a custom target', () => {
-    const v = unlimited(input({ sessionStreak: 3, streakChordIds: new Set(['red', 'yellow']) }), {
+    const v = unlimited(input({ sessionStreak: 3 }), {
       ...DEFAULT_PACING_PARAMS,
       streakTarget: 3,
     })
@@ -149,10 +134,7 @@ describe('eguchi', () => {
 
 describe('manual', () => {
   it('is never ready', () => {
-    const v = policyFor('manual')(
-      input({ sessionStreak: 50, streakChordIds: new Set(['red', 'yellow']) }),
-      DEFAULT_PACING_PARAMS,
-    )
+    const v = policyFor('manual')(input({ sessionStreak: 50 }), DEFAULT_PACING_PARAMS)
     expect(v.ready).toBe(false)
   })
 })

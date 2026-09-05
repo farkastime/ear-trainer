@@ -8,7 +8,7 @@ import { useAudio } from '../AudioContext'
 import { CharacterParade } from '../components/CharacterParade'
 
 export const MIN_RITUAL_MS = 1500
-export const LISTEN_MS = 800
+export const LISTEN_MS = 2000
 export const SLOW_LOAD_MS = 6000
 /** Browsers only start audio from a user gesture; past this wait we ask for a tap. */
 export const UNLOCK_WAIT_MS = 1000

@@ -281,7 +281,7 @@ policies ship, chosen in parent settings, each with editable parameters:
 
 | Policy | Default | Ready when |
 |---|---|---|
-| **Unlimited** (default) | streak N = 10 | current in-session streak ≥ N and every awake chord has been answered correctly at least once during this streak |
+| **Unlimited** (default) | streak N = 10 | current in-session streak ≥ N. (Ten in a row means ten; the no-three-in-a-row selection rule already guarantees variety within the streak.) |
 | **Eguchi** | K = 40, D = 14 days, S = 10 sessions | accuracy over the last K answers is 100%, at least D days since the last unlock (or profile creation), and at least S sessions completed since then |
 | **Manual** | — | never automatically; the home screen shows a "ready" badge when the Unlimited rule would fire, and the parent unlocks from settings |
 

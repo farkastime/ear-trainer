@@ -30,7 +30,6 @@ export interface SessionState {
   currentChordId: string | null
   lastAskedId: string | null
   workingSet: WorkingSet
-  streakChordIds: string[]
   phase: SessionPhase
   pendingLevelUp: string | null
   leveledUp: boolean
@@ -90,7 +89,6 @@ export function startSession(profile: Profile, deps: EngineDeps): EngineResult {
     currentChordId: null,
     lastAskedId: null,
     workingSet,
-    streakChordIds: [],
     phase: 'question',
     pendingLevelUp: null,
     leveledUp: false,
@@ -133,7 +131,6 @@ export function answer(
   let next: SessionState = {
     ...session,
     answers: [...session.answers, record],
-    streakChordIds: correct ? Array.from(new Set([...session.streakChordIds, chordId])) : [],
     phase: 'feedback',
   }
   events.push({ type: 'answered', chordId, chosenId, correct, streak, heat: progression.heat })
@@ -163,7 +160,6 @@ export function answer(
     const input = {
       progression,
       sessionStreak: streak,
-      streakChordIds: new Set(next.streakChordIds),
       awakeChordIds: awake,
       now: deps.now,
     }
@@ -202,7 +198,6 @@ export function advance(profile: Profile, session: SessionState, deps: EngineDep
       phase: 'levelUp',
       pendingLevelUp: null,
       leveledUp: true,
-      streakChordIds: [],
       workingSet: { ...session.workingSet, size: awake.length },
     }
     return {

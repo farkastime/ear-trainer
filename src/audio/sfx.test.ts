@@ -109,7 +109,7 @@ describe('createToneSfx', () => {
     sfx.listenCue()
     const noise = by('noise')
     expect(noise.starts).toHaveLength(3)
-    expect(noise.starts[2] - noise.starts[0]).toBeCloseTo(0.26)
+    expect(noise.starts[2] - noise.starts[0]).toBeCloseTo(0.52)
   })
 
   it('jingles play their notes in strictly increasing time on the bell synth', () => {

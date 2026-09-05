@@ -303,7 +303,8 @@ When the policy says ready, the unlock happens immediately, mid-session:
    (see §7.4).
 3. The new character is revealed with its name ("Meet Owl!"), its chord plays
    three times in quick succession (1.1 s apart, overlapping slightly) while
-   the character dances. Tapping the character replays the chord.
+   the character dances inside its own coloured tile, so it reads as
+   something to tap; tapping it replays the chord.
 4. A **Continue** tap returns to the session screen with the new tile added
    in curriculum position, bouncing and glowing.
 5. **Continue** closes the interrupted session quietly (it is recorded with
@@ -337,7 +338,7 @@ bigger than the last:
 | Tier | Trigger | Effect |
 |---|---|---|
 | 1 | every correct answer | one confetti cannon in the chord's colors from just above-left of the first tile (always on screen), lobbing up and right and drifting down; character bounce; ambient heat step |
-| 2 | streak milestone (every 5, configurable) | the same cannon, bigger and in rainbow colors; a big numeral (5, 10, 15…) pops to the centre, lingers about a second, then falls away with the confetti; "chick, chick, ding!" (two taps and a high bell); ★ awarded, heat ignites further, haptic |
+| 2 | streak milestone (every 5, configurable) | the same cannon, bigger and in rainbow colors; a big numeral (5, 10, 15…) pops to the centre, lingers about a second, then falls away with the confetti; "chick, chick" (two quick taps); ★ awarded, heat ignites further, haptic |
 | 3 | session complete | session summary (§7.3): confetti + fireworks, 1–3 stars by accuracy |
 | 4 | level up | full-screen takeover (§6.3) — the biggest effect in the app |
 
@@ -389,7 +390,8 @@ happened in this session the new character is featured on the card.
 Celebration sounds are **unpitched** by default (whoosh, pop, drum,
 cymbal): extra tones must not muddy the pitch exposure the app exists to
 deliver. Exceptions, each kept clear of the chord vocabulary (A3–E5): the
-chord itself; the miss "bee-oop", a descending two-tone blip an octave
+chord itself; the correct-answer "ding-ding", two quick bells an octave
+above; the miss "bee-oop", a descending two-tone blip an octave
 below; and two short bell jingles an octave above, a rising one at level-up
 and a four-note tune at session end, so those moments have a signature the
 child recognises.
@@ -450,7 +452,8 @@ flames; the heat vignette still shifts color). Celebration sound has its own on/
    and returns via the summary, so Home and a live session never coexist.
 3. **Get-ready** — character parade and "Listen!" cue (§5.3).
 4. **Session** — chord tiles (emoji filling half the tile), ambient heat
-   vignette, listening cue, progress trail, hear-again, exit.
+   vignette, listening cue, progress trail, hear-again; a small Stop pinned
+   to the top-left corner of the screen.
 5. **Level-up takeover** — overlay and primer (§6.3).
 6. **Session summary** — §7.3.
 7. **Parent settings** — §9.

@@ -82,6 +82,10 @@ button {
   padding: 22px 40px;
   box-shadow: 0 8px 0 #d84315;
   cursor: pointer;
+  /* Also used on <label>: inline-block so vertical padding sizes it like a button. */
+  display: inline-block;
+  text-align: center;
+  line-height: normal;
 }
 .big-button:active {
   transform: translateY(6px);
@@ -454,7 +458,7 @@ button {
   text-align: center;
 }
 .reveal {
-  font-size: 7rem;
+  width: min(48vw, 260px);
   animation: bounce 1s ease infinite;
   cursor: pointer;
 }
@@ -516,6 +520,21 @@ button {
 .session > * {
   position: relative;
   z-index: 1;
+}
+/* Overlays inside the session must not join the flow or push the grid. */
+.session > .milestone-pop {
+  position: fixed;
+  z-index: 25;
+}
+.session > .stop-button {
+  position: fixed;
+  top: max(10px, env(safe-area-inset-top));
+  left: 10px;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  font-size: 1.1rem;
+  opacity: 0.8;
 }
 
 /* parent */

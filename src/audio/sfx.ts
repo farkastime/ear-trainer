@@ -5,6 +5,7 @@ const MIN_GAP_S = 0.005
 export interface Sfx {
   whoosh(): void
   pop(): void
+  correct(): void
   thud(): void
   cymbal(): void
   steam(): void
@@ -23,6 +24,7 @@ export function createNullSfx(): Sfx & { calls: string[] } {
     calls,
     whoosh: rec('whoosh'),
     pop: rec('pop'),
+    correct: rec('correct'),
     thud: rec('thud'),
     cymbal: rec('cymbal'),
     steam: rec('steam'),
@@ -129,6 +131,13 @@ export function createToneSfx(): Sfx {
         noise!.triggerAttackRelease(0.05, at('noise'))
       })
     },
+    correct() {
+      // "ding-ding": two quick high bells, an octave above the chord vocabulary.
+      safely(() => {
+        bell!.triggerAttackRelease('G6', 0.15, at('bell'))
+        bell!.triggerAttackRelease('C7', 0.25, at('bell', 0.12))
+      })
+    },
     thud() {
       safely(() => drum!.triggerAttackRelease('C1', 0.2, at('drum')))
     },
@@ -161,13 +170,12 @@ export function createToneSfx(): Sfx {
       })
     },
     milestone() {
-      // "chick, chick, ding!": two taps and a high bell.
+      // "chick, chick": two quick taps; the special confetti carries the rest.
       safely(() => {
         filter!.frequency.value = 2500
         noise!.envelope.decay = 0.08
         noise!.triggerAttackRelease(0.06, at('noise'))
         noise!.triggerAttackRelease(0.06, at('noise', 0.16))
-        bell!.triggerAttackRelease('E7', 0.5, at('bell', 0.32))
       })
     },
     jingleLevelUp() {

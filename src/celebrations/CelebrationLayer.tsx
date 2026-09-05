@@ -61,7 +61,7 @@ export function CelebrationLayer({ system }: { system?: ParticleSystem }) {
           if (e.correct) {
             const o = origin()
             cannon(sys, o.x, o.y, palette(e.chordId), scale)
-            if (sound) sfx.pop()
+            if (sound) sfx.correct()
             vibrate([20], haptics)
           } else if (sound) {
             sfx.wrong()

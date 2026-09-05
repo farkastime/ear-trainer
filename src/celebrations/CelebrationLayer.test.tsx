@@ -56,7 +56,7 @@ describe('CelebrationLayer', () => {
       ]),
     )
     expect(system.count).toBeGreaterThan(0)
-    expect(sfx.calls).toEqual(['pop'])
+    expect(sfx.calls).toEqual(['correct'])
     const before = system.count
     act(() =>
       emitEngineEvents([
@@ -71,7 +71,7 @@ describe('CelebrationLayer', () => {
       ]),
     )
     expect(system.count).toBe(before)
-    expect(sfx.calls).toEqual(['pop', 'wrong'])
+    expect(sfx.calls).toEqual(['correct', 'wrong'])
   })
 
   it('keeps launching fireworks while the level-up screen is up, and stops on Continue', () => {

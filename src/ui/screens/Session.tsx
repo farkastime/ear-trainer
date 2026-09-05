@@ -130,19 +130,15 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
       data-testid="screen-session"
       style={heatVars(progression.heat)}
     >
-      <div className="row">
-        <button className="icon-button" aria-label="Stop" onClick={endSession}>
-          ✕
-        </button>
-        <div className="grow center">
-          {listening && (
-            <span className="listening" data-testid="listening" aria-label="Listen">
-              👂
-            </span>
-          )}
-        </div>
-        {/* Spacer keeps the listening cue centred against the Stop button. */}
-        <div style={{ width: 48, height: 48 }} />
+      <button className="icon-button stop-button" aria-label="Stop" onClick={endSession}>
+        ✕
+      </button>
+      <div className="row" style={{ minHeight: 48, justifyContent: 'center' }}>
+        {listening && (
+          <span className="listening" data-testid="listening" aria-label="Listen">
+            👂
+          </span>
+        )}
       </div>
       <ProgressTrail answers={session.answers} target={session.target} />
       <div className="center">

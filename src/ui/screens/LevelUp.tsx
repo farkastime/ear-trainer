@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, type CSSProperties } from 'react'
 import { loadWithFallback } from '../../audio/loading'
 import { chordById } from '../../core/content/chords'
 import { newestUnlockedId } from '../../core/content/curriculum'
@@ -48,13 +48,21 @@ export function LevelUp() {
     <div className="overlay" data-testid="level-up" role="dialog" aria-label="New friend">
       <p style={{ fontSize: '1.4rem', margin: 0 }}>New friend!</p>
       <h1 style={{ margin: 0, fontSize: '2.4rem' }}>Meet {chord.character.name}!</h1>
-      <div
-        className="reveal"
-        style={{ textShadow: `0 0 40px ${chord.color}` }}
+      {/* The character sits in its real tile so it reads as "tap me", like in the session. */}
+      <button
+        className="tile reveal"
+        data-testid="reveal-tile"
+        aria-label={`Hear ${chord.character.name}`}
+        style={
+          { '--tile-color': chord.color, boxShadow: `0 0 60px ${chord.color}` } as CSSProperties
+        }
         onClick={() => player.playChord([...chord.notes], REVEAL_SECONDS)}
       >
-        {chord.character.emoji}
-      </div>
+        <span>{chord.character.emoji}</span>
+      </button>
+      <p className="muted" style={{ margin: 0 }}>
+        Tap to hear it again
+      </p>
       <button className="big-button" onClick={continueAfterLevelUp}>
         Continue
       </button>

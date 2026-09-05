@@ -6,7 +6,7 @@
   --muted: #aaa3bd;
   --card: #322d3f;
   --header-bg: #3d3849;
-  --header-h: 36px;
+  --header-h: 44px;
   --field: #3c3649;
   --line: #4a4459;
   --accent: #ff7043;
@@ -62,9 +62,13 @@ button {
   right: 0;
   margin: 0;
   height: var(--header-h);
-  line-height: var(--header-h);
+  padding: 4px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  line-height: 1;
   background: var(--header-bg);
-  text-align: center;
   font-weight: 800;
   font-size: 1.5rem;
   letter-spacing: 0.04em;

@@ -1,10 +1,15 @@
 import { fireEvent, screen } from '@testing-library/react'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useAppStore } from '../state/store'
 import { App } from './App'
 import { renderApp, resetStore } from './testing'
 
-beforeEach(resetStore)
+beforeEach(() => {
+  // jsdom logs "not implemented" for canvas 2d contexts; CelebrationLayer guards on a null ctx.
+  vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null)
+  resetStore()
+})
+afterEach(() => vi.restoreAllMocks())
 
 describe('App', () => {
   it('shows the profile picker when there are no profiles and creates one', () => {

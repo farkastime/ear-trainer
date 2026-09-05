@@ -10,11 +10,9 @@ beforeEach(() => {
   vi.useFakeTimers()
   resetStore()
   useAppStore.getState().createProfile('Ada', '🐱')
-  useAppStore
-    .getState()
-    .updateSettings({
-      pacingParams: { streakTarget: 3, eguchiWindow: 40, eguchiDays: 14, eguchiSessions: 10 },
-    })
+  useAppStore.getState().updateSettings({
+    pacingParams: { streakTarget: 3, eguchiWindow: 40, eguchiDays: 14, eguchiSessions: 10 },
+  })
   useAppStore.getState().startSession()
   let guard = 0
   while (useAppStore.getState().session?.phase !== 'levelUp' && guard++ < 30) {

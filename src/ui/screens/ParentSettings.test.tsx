@@ -86,6 +86,15 @@ describe('ParentSettings', () => {
     expect(useAppStore.getState().screen).toBe('home')
   })
 
+  it('discloses an instrument fallback', () => {
+    act(() => {
+      useAppStore.getState().setAudioFallback({ requested: 'organ', used: 'piano' })
+    })
+    renderApp(<ParentSettings />)
+    passGate()
+    expect(screen.getByText(/organ couldn't load; using piano/i)).toBeInTheDocument()
+  })
+
   it('deletes the profile after confirmation', () => {
     vi.spyOn(window, 'confirm').mockReturnValue(true)
     renderApp(<ParentSettings />)

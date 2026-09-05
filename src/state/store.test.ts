@@ -109,6 +109,33 @@ describe('session actions', () => {
     expect(store.getState().pendingPrimer).toBeNull()
   })
 
+  it('queues the wake primer until after the feedback for the waking answer', () => {
+    const { store } = makeStore()
+    store.getState().createProfile('Ada', '🐱')
+    store.getState().updateSettings({ pacing: 'manual' })
+    store.getState().parentUnlockNext()
+    store.setState((st) => ({
+      profiles: st.profiles.map((p) => ({
+        ...p,
+        progression: { ...p.progression, napping: 'blue' },
+      })),
+    }))
+    store.getState().startSession()
+
+    for (let i = 0; i < 4; i++) {
+      clock += 1
+      store.getState().answer(store.getState().session!.currentChordId!)
+      store.getState().advance()
+    }
+    clock += 1
+    store.getState().answer(store.getState().session!.currentChordId!)
+    expect(store.getState().session?.phase).toBe('feedback')
+    expect(store.getState().pendingPrimer).toBeNull()
+
+    store.getState().advance()
+    expect(store.getState().pendingPrimer).toEqual(['blue'])
+  })
+
   it('endSession from mid-session records and navigates to summary', () => {
     const { store } = makeStore()
     store.getState().createProfile('Ada', '🐱')
@@ -183,6 +210,17 @@ describe('persistence', () => {
     expect(backing.getItem('ear-trainer.backup')).toBe('{broken')
     store.getState().dismissNotice()
     expect(store.getState().storageNotice).toBeNull()
+  })
+
+  it('round-trips setAudioFallback without persisting it', () => {
+    const { store, backing } = makeStore()
+    store.getState().createProfile('Ada', '🐱')
+    store.getState().setAudioFallback({ requested: 'organ', used: 'piano' })
+    expect(store.getState().audioFallback).toEqual({ requested: 'organ', used: 'piano' })
+    const raw = JSON.parse(backing.getItem(STORAGE_KEY)!)
+    expect(raw.state.audioFallback).toBeUndefined()
+    store.getState().setAudioFallback(null)
+    expect(store.getState().audioFallback).toBeNull()
   })
 
   it('imports a profile, assigning a fresh id on collision', () => {

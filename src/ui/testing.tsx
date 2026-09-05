@@ -12,7 +12,9 @@ export function resetStore(): void {
     ...EMPTY_SLICE,
     screen: 'profiles',
     pendingPrimer: null,
+    queuedPrimer: null,
     storageNotice: null,
+    audioFallback: null,
   })
 }
 

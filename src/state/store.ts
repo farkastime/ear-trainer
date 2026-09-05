@@ -16,7 +16,9 @@ export type Screen = 'profiles' | 'home' | 'getReady' | 'session' | 'summary' | 
 export interface AppState extends PersistedSlice {
   screen: Screen
   pendingPrimer: string[] | null
+  queuedPrimer: string[] | null
   storageNotice: 'corrupt' | 'writeFailed' | null
+  audioFallback: { requested: string; used: string } | null
   goTo(screen: Screen): void
   createProfile(name: string, avatarEmoji: string): string
   deleteProfile(id: string): void
@@ -34,6 +36,7 @@ export interface AppState extends PersistedSlice {
   parentResetProgress(): void
   importProfile(json: string): void
   dismissNotice(): void
+  setAudioFallback(value: { requested: string; used: string } | null): void
 }
 
 export interface StoreDeps {
@@ -89,7 +92,9 @@ export function createAppStore(deps: StoreDeps) {
           const woken = result.events.find(
             (e): e is Extract<EngineEvent, { type: 'chordWoken' }> => e.type === 'chordWoken',
           )
-          if (woken) patch.pendingPrimer = [woken.chordId]
+          // Queued rather than applied immediately, so the primer doesn't overlap the
+          // feedback replay; `advance` promotes it to `pendingPrimer` for the next question.
+          if (woken) patch.queuedPrimer = [woken.chordId]
           write(patch)
           emitEngineEvents(result.events)
         }
@@ -100,7 +105,9 @@ export function createAppStore(deps: StoreDeps) {
           ...EMPTY_SLICE,
           screen: 'profiles',
           pendingPrimer: null,
+          queuedPrimer: null,
           storageNotice: null,
+          audioFallback: null,
 
           goTo: (screen) => set({ screen }),
 
@@ -141,10 +148,18 @@ export function createAppStore(deps: StoreDeps) {
               session ? engine.answer(profile, session, chordId, engineDeps()) : null,
             ),
 
-          advance: () =>
+          advance: () => {
             apply((profile, session) =>
               session ? engine.advance(profile, session, engineDeps()) : null,
-            ),
+            )
+            const queued = get().queuedPrimer
+            if (queued === null) return
+            if (get().session?.phase === 'question') {
+              write({ pendingPrimer: queued, queuedPrimer: null })
+            } else {
+              write({ queuedPrimer: null })
+            }
+          },
 
           continueAfterLevelUp: () => {
             apply((profile, session) =>
@@ -223,6 +238,8 @@ export function createAppStore(deps: StoreDeps) {
           },
 
           dismissNotice: () => set({ storageNotice: null }),
+
+          setAudioFallback: (value) => set({ audioFallback: value }),
         }
       },
       {

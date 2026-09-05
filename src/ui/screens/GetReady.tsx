@@ -20,6 +20,7 @@ export function GetReady() {
   const session = useAppStore((s) => s.session)
   const startSession = useAppStore((s) => s.startSession)
   const goTo = useAppStore((s) => s.goTo)
+  const setAudioFallback = useAppStore((s) => s.setAudioFallback)
   const { player, sfx } = useAudio()
   const [stage, setStage] = useState<Stage>('loading')
   const [slow, setSlow] = useState(false)
@@ -38,7 +39,15 @@ export function GetReady() {
     ;(async () => {
       const minimum = sleep(MIN_RITUAL_MS)
       await player.unlock()
-      await loadWithFallback(player, instrument, notes, instrumentById(DEFAULT_INSTRUMENT_ID))
+      const result = await loadWithFallback(
+        player,
+        instrument,
+        notes,
+        instrumentById(DEFAULT_INSTRUMENT_ID),
+      )
+      setAudioFallback(
+        result.fellBack ? { requested: instrument.id, used: result.instrument.id } : null,
+      )
       await minimum
       if (cancelled) return
       clearTimeout(slowTimer)

@@ -54,6 +54,7 @@ describe('GetReady', () => {
     await flush(MIN_RITUAL_MS + LISTEN_MS + 3000)
     expect(player.loaded).toEqual(['organ', 'organ', 'organ', 'piano'])
     expect(useAppStore.getState().screen).toBe('session')
+    expect(useAppStore.getState().audioFallback).toEqual({ requested: 'organ', used: 'piano' })
     first.unmount()
 
     resetStore()

@@ -84,4 +84,26 @@ describe('createTonePlayer', () => {
   it('playChord before any load is a no-op', () => {
     expect(() => createTonePlayer().playChord(['C4'], 1)).not.toThrow()
   })
+
+  it('retries a sample whose add never completed', async () => {
+    vi.useFakeTimers()
+    try {
+      const player = createTonePlayer()
+      const piano = instrumentById('piano')
+      await player.loadInstrument(piano, ['C4'])
+      const sampler = samplers[0]
+      const realAdd = sampler.add.bind(sampler)
+      sampler.add = () => sampler // never invokes the callback
+      const failing = player.loadInstrument(piano, ['A3'])
+      const rejection = expect(failing).rejects.toThrow(/timed out/)
+      await vi.advanceTimersByTimeAsync(20_000)
+      await rejection
+      expect(sampler.added).toEqual({})
+      sampler.add = realAdd
+      await player.loadInstrument(piano, ['A3'])
+      expect(sampler.added).toEqual({ A3: 'A3.mp3' })
+    } finally {
+      vi.useRealTimers()
+    }
+  })
 })

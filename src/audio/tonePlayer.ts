@@ -61,8 +61,10 @@ export function createTonePlayer(): AudioPlayer {
             missing.map(
               ([n, file]) =>
                 new Promise<void>((resolve) => {
-                  entry!.sampler.add(n as Parameters<Tone.Sampler['add']>[0], file, resolve)
-                  entry!.notes.add(n)
+                  entry!.sampler.add(n as Parameters<Tone.Sampler['add']>[0], file, () => {
+                    entry!.notes.add(n)
+                    resolve()
+                  })
                 }),
             ),
           ),

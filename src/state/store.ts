@@ -10,6 +10,7 @@ import { parseProfileExport } from './exportImport'
 import { EMPTY_SLICE, PERSIST_VERSION, migrate, type PersistedSlice } from './migrations'
 import { clampSettings, newProfile } from './profile'
 import { STORAGE_KEY, createSafeStorage, type SafeStorage } from './storage'
+import { randomId } from './uuid'
 
 export type Screen = 'profiles' | 'home' | 'getReady' | 'session' | 'summary' | 'parent'
 
@@ -263,5 +264,5 @@ export const useAppStore = createAppStore({
   now: () => Date.now(),
   rng: Math.random,
   storage: createSafeStorage(window.localStorage),
-  uuid: () => crypto.randomUUID(),
+  uuid: randomId,
 })

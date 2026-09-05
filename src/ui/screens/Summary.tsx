@@ -13,7 +13,7 @@ export function Summary() {
   const featured = summary.leveledUp
     ? chordById(newestUnlockedId(profile.progression.unlocks))
     : null
-  const line = LINES[summary.count % LINES.length]
+  const line = LINES[summary.endedAt % LINES.length]
 
   return (
     <div

@@ -25,5 +25,17 @@ describe('export/import', () => {
         }),
       ),
     ).toThrow(/invalid profile file/)
+    expect(() =>
+      parseProfileExport(
+        JSON.stringify({
+          format: 'ear-trainer-profile',
+          version: 1,
+          profile: {
+            ...makeProfile(),
+            progression: { ...makeProfile().progression, unlocks: [] },
+          },
+        }),
+      ),
+    ).toThrow(/invalid profile file/)
   })
 })

@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { CelebrationLayer } from '../celebrations/CelebrationLayer'
+import { download } from '../state/exportImport'
 import { useAppStore } from '../state/store'
+import { BACKUP_KEY } from '../state/storage'
 import { GetReady } from './screens/GetReady'
 import { Home } from './screens/Home'
 import { LevelUp } from './screens/LevelUp'
@@ -17,9 +19,19 @@ function StorageNotice() {
     notice === 'corrupt'
       ? 'Saved progress could not be read. A backup was kept and the app started fresh.'
       : 'Progress could not be saved on this device. Check free space or private-browsing settings.'
+  const backup = notice === 'corrupt' ? window.localStorage.getItem(BACKUP_KEY) : null
   return (
     <div className="card" role="alert" style={{ margin: 12 }}>
       <p>{text}</p>
+      {notice === 'corrupt' && (
+        <button
+          className="big-button secondary"
+          disabled={backup === null}
+          onClick={() => backup !== null && download('ear-trainer-backup.json', backup)}
+        >
+          Download backup
+        </button>
+      )}
       <button className="big-button secondary" onClick={dismiss}>
         OK
       </button>

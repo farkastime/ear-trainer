@@ -7,6 +7,16 @@ export function exportProfile(profile: Profile): string {
   return JSON.stringify({ format: FORMAT, version: VERSION, profile }, null, 2)
 }
 
+export function download(filename: string, text: string) {
+  const blob = new Blob([text], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 function looksLikeProfile(x: unknown): x is Profile {
   if (typeof x !== 'object' || x === null) return false
   const p = x as Record<string, unknown>
@@ -18,6 +28,7 @@ function looksLikeProfile(x: unknown): x is Profile {
     p.settings !== null &&
     prog !== undefined &&
     Array.isArray(prog.unlocks) &&
+    prog.unlocks.length >= 2 &&
     Array.isArray(prog.sessions)
   )
 }

@@ -1,5 +1,7 @@
 import { fireEvent, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import * as exportImport from '../state/exportImport'
+import { BACKUP_KEY } from '../state/storage'
 import { useAppStore } from '../state/store'
 import { App } from './App'
 import { renderApp, resetStore } from './testing'
@@ -43,5 +45,20 @@ describe('App', () => {
     expect(screen.getByText(/could not be read/i)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /ok/i }))
     expect(screen.queryByText(/could not be read/i)).toBeNull()
+  })
+
+  it('downloads the corrupt-state backup', () => {
+    window.localStorage.setItem(BACKUP_KEY, '{broken')
+    useAppStore.setState({ storageNotice: 'corrupt' })
+    const spy = vi.spyOn(exportImport, 'download').mockImplementation(() => {})
+    renderApp(<App />)
+    fireEvent.click(screen.getByRole('button', { name: /download backup/i }))
+    expect(spy).toHaveBeenCalledWith('ear-trainer-backup.json', '{broken')
+  })
+
+  it('disables the backup download when no backup is present', () => {
+    useAppStore.setState({ storageNotice: 'corrupt' })
+    renderApp(<App />)
+    expect(screen.getByRole('button', { name: /download backup/i })).toBeDisabled()
   })
 })

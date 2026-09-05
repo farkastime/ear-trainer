@@ -1,23 +1,13 @@
 import { useState } from 'react'
 import { chordById } from '../../core/content/chords'
 import { levelOf, nextChordId, unlockedChordIds } from '../../core/content/curriculum'
-import { INSTRUMENTS } from '../../core/content/instruments'
+import { INSTRUMENTS, instrumentById } from '../../core/content/instruments'
 import { PACING_LIMITS } from '../../core/engine/pacing'
 import type { Intensity, PacingParams, PacingPolicyId } from '../../core/types'
-import { exportProfile } from '../../state/exportImport'
+import { download, exportProfile } from '../../state/exportImport'
 import { SESSION_TARGET_LIMITS } from '../../state/profile'
 import { activeProfile, useAppStore } from '../../state/store'
 import { ParentGate } from './ParentGate'
-
-function download(filename: string, text: string) {
-  const blob = new Blob([text], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  a.click()
-  URL.revokeObjectURL(url)
-}
 
 export function ParentSettings() {
   const [passed, setPassed] = useState(false)
@@ -28,6 +18,7 @@ export function ParentSettings() {
 function SettingsBody() {
   const profile = useAppStore(activeProfile)
   const session = useAppStore((s) => s.session)
+  const audioFallback = useAppStore((s) => s.audioFallback)
   const goTo = useAppStore((s) => s.goTo)
   const updateSettings = useAppStore((s) => s.updateSettings)
   const parentUnlockNext = useAppStore((s) => s.parentUnlockNext)
@@ -210,6 +201,12 @@ function SettingsBody() {
             onChange={(e) => updateSettings({ haptics: e.target.checked })}
           />
         </label>
+        {audioFallback && (
+          <p className="danger">
+            {instrumentById(audioFallback.requested).name} couldn't load; using{' '}
+            {instrumentById(audioFallback.used).name}.
+          </p>
+        )}
       </section>
 
       <section className="card settings-section">

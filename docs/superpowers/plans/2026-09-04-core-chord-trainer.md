@@ -3445,26 +3445,28 @@ describe('loadWithFallback', () => {
 ```ts
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const samplers: FakeSampler[] = []
-class FakeSampler {
-  urls: Record<string, string>
-  opts: Record<string, unknown>
-  added: Record<string, string> = {}
-  triggered: { notes: string[]; duration: number }[] = []
-  released = 0
-  constructor(opts: Record<string, unknown>) {
-    this.opts = opts
-    this.urls = opts.urls as Record<string, string>
-    samplers.push(this)
-    queueMicrotask(() => (opts.onload as () => void)())
+// vi.mock is hoisted above imports, so everything its factory touches must be hoisted too.
+const { FakeSampler, samplers, start, resume } = vi.hoisted(() => {
+  class FakeSampler {
+    urls: Record<string, string>
+    opts: Record<string, unknown>
+    added: Record<string, string> = {}
+    triggered: { notes: string[]; duration: number }[] = []
+    released = 0
+    constructor(opts: Record<string, unknown>) {
+      this.opts = opts
+      this.urls = opts.urls as Record<string, string>
+      samplers.push(this)
+      queueMicrotask(() => (opts.onload as () => void)())
+    }
+    toDestination() { return this }
+    add(note: string, url: string, cb?: () => void) { this.added[note] = url; cb?.(); return this }
+    triggerAttackRelease(notes: string[], duration: number) { this.triggered.push({ notes, duration }); return this }
+    releaseAll() { this.released++; return this }
   }
-  toDestination() { return this }
-  add(note: string, url: string, cb?: () => void) { this.added[note] = url; cb?.(); return this }
-  triggerAttackRelease(notes: string[], duration: number) { this.triggered.push({ notes, duration }); return this }
-  releaseAll() { this.released++; return this }
-}
-const start = vi.fn(async () => {})
-const resume = vi.fn(async () => {})
+  const samplers: FakeSampler[] = []
+  return { FakeSampler, samplers, start: vi.fn(async () => {}), resume: vi.fn(async () => {}) }
+})
 vi.mock('tone', () => ({
   Sampler: FakeSampler,
   start,
@@ -6379,6 +6381,7 @@ describe('CelebrationLayer', () => {
     const sfx = createNullSfx()
     renderApp(<CelebrationLayer system={system} />, { sfx })
     act(() => emitEngineEvents([{ type: 'levelUp', chordId: 'blue', level: 2 }]))
+    act(() => vi.advanceTimersByTime(0))
     expect(system.count).toBe(1)
     act(() => vi.advanceTimersByTime(1600))
     expect(system.count).toBe(6)

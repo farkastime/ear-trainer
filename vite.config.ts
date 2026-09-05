@@ -7,7 +7,6 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/icon.svg'],
       manifest: {
         name: 'Ear Trainer',
         short_name: 'Ear Trainer',

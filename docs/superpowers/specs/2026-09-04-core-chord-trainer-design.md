@@ -190,7 +190,8 @@ Loading is a moment, not a spinner. After Play:
    reload mid-session), a "Tap to start" button appears after 1 s and the
    ritual continues from the tap.
 3. When loading is done and at least 1.5 s have passed, a "Listen!" cue
-   appears with a pulsing ear emoji and a soft unpitched whoosh.
+   appears with a pulsing ear emoji and three quick unpitched taps
+   ("t-t-tap").
 4. The first chord plays.
 
 If loading takes longer than 6 s the parade loops and a small "getting the
@@ -294,17 +295,22 @@ settings (N 3–50, K 10–200, D 0–60, S 0–100).
 When the policy says ready, the unlock happens immediately, mid-session:
 
 1. Session input freezes; ambient heat flares to white-hot.
-2. Full-screen takeover: fireworks barrage, drum fanfare and a short rising
-   jingle (see §7.4).
+2. Full-screen takeover: fireworks that keep launching (one every 0.7 s) for
+   as long as the screen is up, a drum fanfare and a short rising jingle
+   (see §7.4).
 3. The new character is revealed with its name ("Meet Owl!"), its chord plays
    three times in quick succession (1.1 s apart, overlapping slightly) while
    the character dances. Tapping the character replays the chord.
 4. A **Continue** tap returns to the session screen with the new tile added
    in curriculum position, bouncing and glowing.
-5. The session resumes at once; there is no run-through of the whole set,
-   which added noise without adding clarity. The new chord becomes the most
-   recently unlocked chord for weighting; the streak resets to 0 so the next
-   unlock is earned fresh.
+5. **Continue** closes the interrupted session quietly (it is recorded with
+   its stars and its level-up, but no summary screen is shown, since the
+   takeover was the celebration) and starts a fresh full session with the
+   new chord live. A late unlock is therefore never cut short by the old
+   session's target. There is no run-through of the whole set, which added
+   noise without adding clarity. The new chord becomes the most recently
+   unlocked chord for weighting; the streak starts at 0 so the next unlock
+   is earned fresh.
 
 ### 6.4 Stepping back
 
@@ -328,7 +334,7 @@ bigger than the last:
 | Tier | Trigger | Effect |
 |---|---|---|
 | 1 | every correct answer | one confetti cannon in the chord's colors from just above-left of the first tile (always on screen), lobbing up and right and drifting down; character bounce; ambient heat step |
-| 2 | streak milestone (every 5, configurable) | the same cannon, bigger and in rainbow colors, ★ awarded, heat ignites further, haptic |
+| 2 | streak milestone (every 5, configurable) | the same cannon, bigger and in rainbow colors, plus a big numeral (5, 10, 15…) that flies up and fades in about a second; ★ awarded, heat ignites further, haptic |
 | 3 | session complete | session summary (§7.3): confetti + fireworks, 1–3 stars by accuracy |
 | 4 | level up | full-screen takeover (§6.3) — the biggest effect in the app |
 

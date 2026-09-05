@@ -251,14 +251,48 @@ button {
   transform: translateY(4px);
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
 }
-.tile > span:first-child,
-.tile > img {
+/* No fixed box around the glyph: emoji advance widths exceed the glyph, which
+   would push it off centre; the tile's own flex centring places it. */
+.tile > span:first-child {
   font-size: 50cqw;
   line-height: 1;
+  display: block;
+  text-align: center;
+}
+.tile > img {
   width: 50cqw;
   height: 50cqw;
-  display: grid;
-  place-items: center;
+  display: block;
+}
+
+.milestone-pop {
+  position: fixed;
+  left: 50%;
+  top: 45%;
+  transform: translate(-50%, -50%);
+  font-size: 7rem;
+  font-weight: 900;
+  color: #fff;
+  text-shadow:
+    0 0 24px var(--heat-color),
+    0 4px 0 rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  z-index: 25;
+  animation: milestone 1.2s ease-out forwards;
+}
+@keyframes milestone {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -30%) scale(0.5);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -130%) scale(1.4);
+  }
 }
 .tile .label {
   font-size: 1rem;

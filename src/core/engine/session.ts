@@ -224,9 +224,11 @@ export function continueAfterLevelUp(
   deps: EngineDeps,
 ): EngineResult {
   if (session.phase !== 'levelUp') return unchanged(profile, session)
-  if (session.answers.length >= session.target) return endSession(profile, session, deps)
-  const asked = ask(profile.progression, session, deps.rng)
-  return { session: asked.session, progression: profile.progression, events: [asked.event] }
+  // The level-up closes the current session quietly (recorded, no summary) and a
+  // fresh one starts with the new chord, so a late unlock is never cut short.
+  const ended = endSession(profile, session, deps)
+  const started = startSession({ ...profile, progression: ended.progression }, deps)
+  return { session: started.session, progression: started.progression, events: started.events }
 }
 
 export function endSession(

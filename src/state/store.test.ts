@@ -105,6 +105,10 @@ describe('session actions', () => {
     store.getState().continueAfterLevelUp()
     expect(store.getState().pendingPrimer).toBeNull()
     expect(store.getState().session?.phase).toBe('question')
+    // A fresh session began; the level-up session was recorded without a summary screen.
+    expect(store.getState().session?.answers).toHaveLength(0)
+    expect(store.getState().screen).toBe('session')
+    expect(activeProfile(store.getState())?.progression.sessions).toHaveLength(1)
   })
 
   it('queues the wake primer until after the feedback for the waking answer', () => {

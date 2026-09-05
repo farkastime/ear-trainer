@@ -72,7 +72,7 @@ export function GetReady() {
       if (cancelled) return
       clearTimeout(slowTimer)
       setStage('listen')
-      if (profile.settings.celebrationSound) sfx.whoosh()
+      if (profile.settings.celebrationSound) sfx.listenCue()
       await sleep(LISTEN_MS)
       if (cancelled) return
       if (resuming) goTo('session')

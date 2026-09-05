@@ -5,7 +5,7 @@ import { mulberry32 } from '../core/engine/rng'
 import { emitEngineEvents } from '../state/eventBus'
 import { useAppStore } from '../state/store'
 import { renderApp, resetStore } from '../ui/testing'
-import { CelebrationLayer } from './CelebrationLayer'
+import { CelebrationLayer, FIREWORK_EVERY_MS } from './CelebrationLayer'
 import { ParticleSystem } from './particles'
 
 beforeEach(() => {
@@ -74,15 +74,36 @@ describe('CelebrationLayer', () => {
     expect(sfx.calls).toEqual(['pop', 'wrong'])
   })
 
-  it('launches a staggered barrage on level up and confetti on session complete', () => {
+  it('keeps launching fireworks while the level-up screen is up, and stops on Continue', () => {
+    const system = new ParticleSystem(5000, mulberry32(1))
+    useAppStore.getState().updateSettings({
+      pacingParams: { streakTarget: 3, eguchiWindow: 40, eguchiDays: 14, eguchiSessions: 10 },
+    })
+    renderApp(<CelebrationLayer system={system} />)
+    act(() => useAppStore.getState().startSession())
+    let guard = 0
+    while (useAppStore.getState().session?.phase !== 'levelUp' && guard++ < 30) {
+      act(() => {
+        const s = useAppStore.getState().session!
+        useAppStore.getState().answer(s.currentChordId!)
+        useAppStore.getState().advance()
+      })
+    }
+    expect(useAppStore.getState().session?.phase).toBe('levelUp')
+    // Without ticks nothing dies, so each launch adds exactly one rocket.
+    const atLevelUp = system.count
+    act(() => vi.advanceTimersByTime(FIREWORK_EVERY_MS * 3 + 10))
+    expect(system.count).toBe(atLevelUp + 3)
+    act(() => useAppStore.getState().continueAfterLevelUp())
+    const afterContinue = system.count
+    act(() => vi.advanceTimersByTime(FIREWORK_EVERY_MS * 3 + 10))
+    expect(system.count).toBe(afterContinue)
+  })
+
+  it('rains confetti with a cymbal and jingle when a session completes', () => {
     const system = new ParticleSystem(5000, mulberry32(1))
     const sfx = createNullSfx()
     renderApp(<CelebrationLayer system={system} />, { sfx })
-    act(() => emitEngineEvents([{ type: 'levelUp', chordId: 'blue', level: 2 }]))
-    act(() => vi.advanceTimersByTime(0))
-    expect(system.count).toBe(1)
-    act(() => vi.advanceTimersByTime(1600))
-    expect(system.count).toBe(6)
     act(() => emitEngineEvents([{ type: 'sessionComplete', summary }]))
     expect(system.count).toBeGreaterThan(100)
     expect(sfx.calls).toEqual(['cymbal', 'jingleSessionEnd'])

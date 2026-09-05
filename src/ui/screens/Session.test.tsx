@@ -3,7 +3,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { chordById } from '../../core/content/chords'
 import { activeProfile, useAppStore } from '../../state/store'
 import { renderApp, resetStore } from '../testing'
-import { FEEDBACK_CORRECT_MS, FEEDBACK_WRONG_MS, QUESTION_DELAY_MS, Session } from './Session'
+import {
+  FEEDBACK_CORRECT_MS,
+  FEEDBACK_WRONG_MS,
+  MILESTONE_POP_MS,
+  QUESTION_DELAY_MS,
+  Session,
+} from './Session'
 
 beforeEach(() => {
   vi.useFakeTimers()
@@ -143,6 +149,21 @@ describe('Session', () => {
       screen.getAllByTestId('trail-dot').filter((d) => d.className.includes('correct')),
     ).toHaveLength(3)
     expect(activeProfile(useAppStore.getState())!.progression.streak).toBe(3)
+  })
+
+  it('throws up a big numeral at a streak milestone, then clears it', () => {
+    useAppStore.getState().updateSettings({ pacing: 'manual' })
+    useAppStore.getState().startSession()
+    renderApp(<Session />)
+    for (let i = 0; i < 4; i++) {
+      fireEvent.click(tile(current()))
+      act(() => vi.advanceTimersByTime(FEEDBACK_CORRECT_MS))
+    }
+    expect(screen.queryByTestId('milestone-pop')).toBeNull()
+    fireEvent.click(tile(current()))
+    expect(screen.getByTestId('milestone-pop').textContent).toBe('5')
+    act(() => vi.advanceTimersByTime(MILESTONE_POP_MS + 10))
+    expect(screen.queryByTestId('milestone-pop')).toBeNull()
   })
 
   it('runs the primer, highlighting tiles in turn and blocking taps', () => {

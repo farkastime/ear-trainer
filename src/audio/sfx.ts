@@ -9,6 +9,7 @@ export interface Sfx {
   cymbal(): void
   steam(): void
   wrong(): void
+  listenCue(): void
   fanfare(): void
   jingleLevelUp(): void
   jingleSessionEnd(): void
@@ -25,6 +26,7 @@ export function createNullSfx(): Sfx & { calls: string[] } {
     cymbal: rec('cymbal'),
     steam: rec('steam'),
     wrong: rec('wrong'),
+    listenCue: rec('listenCue'),
     fanfare: rec('fanfare'),
     jingleLevelUp: rec('jingleLevelUp'),
     jingleSessionEnd: rec('jingleSessionEnd'),
@@ -144,6 +146,16 @@ export function createToneSfx(): Sfx {
       safely(() => {
         blip!.triggerAttackRelease('E3', 0.18, at('blip'))
         blip!.triggerAttackRelease('A2', 0.35, at('blip', 0.2))
+      })
+    },
+    listenCue() {
+      // Three quick taps ("t-t-tap") announce that a question is coming.
+      safely(() => {
+        filter!.frequency.value = 2500
+        noise!.envelope.decay = 0.08
+        noise!.triggerAttackRelease(0.05, at('noise'))
+        noise!.triggerAttackRelease(0.05, at('noise', 0.13))
+        noise!.triggerAttackRelease(0.09, at('noise', 0.26))
       })
     },
     jingleLevelUp() {

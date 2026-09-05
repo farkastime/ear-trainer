@@ -104,6 +104,14 @@ describe('createToneSfx', () => {
     expect(by('drum').starts).toHaveLength(0)
   })
 
+  it('the listen cue is three quick taps', () => {
+    const sfx = createToneSfx()
+    sfx.listenCue()
+    const noise = by('noise')
+    expect(noise.starts).toHaveLength(3)
+    expect(noise.starts[2] - noise.starts[0]).toBeCloseTo(0.26)
+  })
+
   it('jingles play their notes in strictly increasing time on the bell synth', () => {
     const sfx = createToneSfx()
     sfx.jingleLevelUp()

@@ -44,7 +44,25 @@ test('a child can complete a session and level up', async ({ page }) => {
     if (s.phase === 'levelUp') {
       leveledUp = true
       await page.getByRole('button', { name: 'Continue' }).click()
-      await page.waitForTimeout(500)
+      // Continue rolls into a fresh session; a perfect player would level up
+      // forever, so answer a few more and stop to reach the summary.
+      for (let i = 0; i < 3; i++) {
+        await page.waitForFunction(
+          () => window.__earTrainer.getState().session?.phase === 'question',
+          null,
+          { timeout: 10_000 },
+        )
+        const cur = await page.evaluate(
+          () => window.__earTrainer.getState().session?.currentChordId,
+        )
+        await page.getByTestId(`tile-${cur}`).click()
+        await page.waitForFunction(
+          () => window.__earTrainer.getState().session?.phase !== 'feedback',
+          null,
+          { timeout: 10_000 },
+        )
+      }
+      await page.getByRole('button', { name: 'Stop' }).click()
       continue
     }
     if (s.phase !== 'question' || !s.current) {

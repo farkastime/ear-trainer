@@ -190,16 +190,26 @@ describe('level up', () => {
 
     const cont = continueAfterLevelUp(profile, session, deps(5000))
     expect(cont.session.phase).toBe('question')
-    expect(types(cont.events)).toEqual(['questionAsked'])
+    expect(cont.session.answers).toHaveLength(0)
+    expect(cont.session.startedAt).toBe(5000)
+    expect(types(cont.events)).toEqual(['sessionStarted', 'questionAsked'])
     expect(workingSetIds(cont.progression, cont.session)).toEqual(['red', 'yellow', 'blue'])
+    // The interrupted session is recorded, with its level-up, but no summary is shown.
+    expect(cont.progression.sessions).toHaveLength(1)
+    expect(cont.progression.sessions[0]).toMatchObject({
+      leveledUp: true,
+      count: session.answers.length,
+      endedAt: 5000,
+    })
   })
 
-  it('finishes the session instead if the target was reached at the level-up', () => {
+  it('rolls into a fresh session even when the target was reached at the level-up', () => {
     const { profile, session } = runUntilLevelUp(makeProfile({ settings: { sessionTarget: 10 } }))
     expect(session.phase).toBe('levelUp')
     const cont = continueAfterLevelUp(profile, session, deps(5000))
-    expect(cont.session.phase).toBe('summary')
-    expect(cont.session.summary?.leveledUp).toBe(true)
+    expect(cont.session.phase).toBe('question')
+    expect(cont.session.answers).toHaveLength(0)
+    expect(cont.progression.sessions[0]).toMatchObject({ leveledUp: true, countsForPacing: true })
   })
 
   it('does not unlock under the Eguchi policy when the window is not full', () => {

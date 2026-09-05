@@ -5,6 +5,7 @@ import { chordById } from '../../core/content/chords'
 import { unlockedChordIds } from '../../core/content/curriculum'
 import type { SessionState } from '../../core/engine/session'
 import type { Profile } from '../../core/types'
+import { onEngineEvent } from '../../state/eventBus'
 import { activeProfile, useAppStore } from '../../state/store'
 import { useAudio } from '../AudioContext'
 import { ChordTile, type TileFlash } from '../components/ChordTile'
@@ -16,6 +17,7 @@ import { usePrimer } from '../hooks/usePrimer'
 export const FEEDBACK_CORRECT_MS = 1500
 export const FEEDBACK_WRONG_MS = 1800
 export const QUESTION_DELAY_MS = 500
+export const MILESTONE_POP_MS = 1200
 const PRIMER_SECONDS = 1.2
 
 export function Session() {
@@ -34,7 +36,23 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
   const { player } = useAudio()
   const [lastChosen, setLastChosen] = useState<string | null>(null)
   const [listening, setListening] = useState(false)
+  const [milestone, setMilestone] = useState<number | null>(null)
   const primerReplayTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const milestoneTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // A big numeral flies up with the milestone confetti, then is gone: a moment, not a counter.
+  useEffect(() => {
+    const off = onEngineEvent((e) => {
+      if (e.type !== 'streakMilestone') return
+      setMilestone(e.streak)
+      if (milestoneTimer.current) clearTimeout(milestoneTimer.current)
+      milestoneTimer.current = setTimeout(() => setMilestone(null), MILESTONE_POP_MS)
+    })
+    return () => {
+      off()
+      if (milestoneTimer.current) clearTimeout(milestoneTimer.current)
+    }
+  }, [])
 
   const play = (chordId: string, seconds: number) =>
     player.playChord([...chordById(chordId).notes], seconds)
@@ -135,6 +153,11 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
         </button>
       </div>
       <ProgressTrail answers={session.answers} target={session.target} />
+      {milestone !== null && (
+        <div className="milestone-pop" data-testid="milestone-pop" aria-hidden="true">
+          {milestone}
+        </div>
+      )}
       <TileGrid count={unlocked.length}>
         {unlocked.map((id) => (
           <ChordTile

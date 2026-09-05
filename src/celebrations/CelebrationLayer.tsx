@@ -12,8 +12,8 @@ import { ParticleSystem } from './particles'
 import { effectiveIntensity, intensityScale, moodPalette } from './presets'
 
 const CONFETTI_COLORS = ['#ffd54f', '#4fc3f7', '#ff7043', '#66bb6a', '#ba68c8']
-const BARRAGE = 6
-const BARRAGE_GAP_MS = 250
+/** Fireworks keep launching at this rate for as long as the level-up screen is up. */
+export const FIREWORK_EVERY_MS = 700
 const SLOW_FRAME_S = 0.032
 const SLOW_FRAMES_BEFORE_CAP = 30
 const REDUCED_MAX = 600
@@ -27,12 +27,14 @@ export function CelebrationLayer({ system }: { system?: ParticleSystem }) {
   const settings = useAppStore((s) => activeProfile(s)?.settings)
   const heat = useAppStore((s) => activeProfile(s)?.progression.heat ?? 0)
   const screen = useAppStore((s) => s.screen)
+  const phase = useAppStore((s) => s.session?.phase ?? null)
   const firstTileId = useAppStore((s) => activeProfile(s)?.progression.unlocks[0]?.chordId ?? null)
-  const live = useRef({ settings, reduced, heat, screen, firstTileId })
-  live.current = { settings, reduced, heat, screen, firstTileId }
+  const live = useRef({ settings, reduced, heat, screen, phase, firstTileId })
+  live.current = { settings, reduced, heat, screen, phase, firstTileId }
 
   useEffect(() => {
     const timers: ReturnType<typeof setTimeout>[] = []
+    const intervals: ReturnType<typeof setInterval>[] = []
     const off = onEngineEvent((e: EngineEvent) => {
       const { settings, reduced, firstTileId } = live.current
       const scale = intensityScale(effectiveIntensity(settings?.intensity ?? 'full', reduced))
@@ -79,23 +81,28 @@ export function CelebrationLayer({ system }: { system?: ParticleSystem }) {
           if (sound) sfx.whoosh()
           break
         }
-        case 'levelUp':
-          for (let i = 0; i < BARRAGE; i++) {
-            timers.push(
-              setTimeout(() => {
-                firework(
-                  sys,
-                  w * (0.2 + 0.6 * Math.random()),
-                  h,
-                  h * (0.15 + 0.35 * Math.random()),
-                  palette(e.chordId),
-                  scale,
-                )
-              }, i * BARRAGE_GAP_MS),
+        case 'levelUp': {
+          const launch = () =>
+            firework(
+              sys,
+              w * (0.15 + 0.7 * Math.random()),
+              h,
+              h * (0.12 + 0.4 * Math.random()),
+              palette(e.chordId),
+              scale,
             )
-          }
+          launch()
+          const id = setInterval(() => {
+            if (live.current.phase !== 'levelUp') {
+              clearInterval(id)
+              return
+            }
+            launch()
+          }, FIREWORK_EVERY_MS)
+          intervals.push(id)
           vibrate([50, 80, 50, 80, 120], haptics)
           break
+        }
         case 'sessionComplete':
           if (e.summary.count === 0) break
           confetti(sys, w, CONFETTI_COLORS, scale)
@@ -120,6 +127,7 @@ export function CelebrationLayer({ system }: { system?: ParticleSystem }) {
     return () => {
       off()
       timers.forEach(clearTimeout)
+      intervals.forEach(clearInterval)
     }
   }, [sfx])
 

@@ -156,7 +156,10 @@ selectable in parent settings. There is no unlock gating in v1.
 5. Child taps a tile.
    - **Correct:** tile pops, particle burst in the chord's color, character
      bounces, ambient heat rises, the chord replays once as confirmation,
-     then auto-advance after ~1 s.
+     then auto-advance once the replay has finished plus a short pause
+     (about 2.2 s in total), so the next question starts in silence. A
+     pulsing ear in the header marks the moments a question chord is
+     sounding.
    - **Wrong:** tapped tile shakes gently, the correct tile pulses and its
      chord replays, ambient heat cools. No penalty, no sad face.
      Auto-advance.
@@ -180,9 +183,12 @@ Loading is a moment, not a spinner. After Play:
 
 1. The unlocked characters parade onto the screen one by one with pops.
    Samples for the active chords and selected instrument load meanwhile.
-2. When loading is done and at least 1.5 s have passed, a "Listen!" cue
+2. If the browser will not start audio without a gesture (typically after a
+   reload mid-session), a "Tap to start" button appears after 1 s and the
+   ritual continues from the tap.
+3. When loading is done and at least 1.5 s have passed, a "Listen!" cue
    appears with a pulsing ear emoji and a soft unpitched whoosh.
-3. The first chord plays.
+4. The first chord plays.
 
 If loading takes longer than 6 s the parade loops and a small "getting the
 sounds ready…" line appears; §11 covers failure.

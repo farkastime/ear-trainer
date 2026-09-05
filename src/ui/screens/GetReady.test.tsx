@@ -1,9 +1,9 @@
-import { act, screen } from '@testing-library/react'
+import { act, fireEvent, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createNullPlayer } from '../../audio/player'
 import { useAppStore } from '../../state/store'
 import { renderApp, resetStore } from '../testing'
-import { GetReady, LISTEN_MS, MIN_RITUAL_MS } from './GetReady'
+import { GetReady, LISTEN_MS, MIN_RITUAL_MS, UNLOCK_WAIT_MS } from './GetReady'
 
 beforeEach(() => {
   vi.useFakeTimers()
@@ -32,6 +32,29 @@ describe('GetReady', () => {
     await flush(MIN_RITUAL_MS)
     expect(screen.getByText(/listen/i)).toBeInTheDocument()
     await flush(LISTEN_MS)
+    expect(useAppStore.getState().session?.phase).toBe('question')
+    expect(useAppStore.getState().screen).toBe('session')
+  })
+
+  it('asks for a tap when the browser will not start audio without a gesture', async () => {
+    const player = createNullPlayer()
+    let unlockCalls = 0
+    let releaseUnlock: () => void = () => {}
+    player.unlock = () =>
+      new Promise<void>((resolve) => {
+        unlockCalls++
+        releaseUnlock = resolve
+      })
+    renderApp(<GetReady />, { player })
+    await flush(UNLOCK_WAIT_MS + 10)
+    expect(screen.getByRole('button', { name: /tap to start/i })).toBeInTheDocument()
+    expect(player.loaded).toEqual(['piano'])
+    expect(useAppStore.getState().session).toBeNull()
+
+    fireEvent.click(screen.getByRole('button', { name: /tap to start/i }))
+    expect(unlockCalls).toBe(2)
+    releaseUnlock()
+    await flush(MIN_RITUAL_MS + LISTEN_MS + 10)
     expect(useAppStore.getState().session?.phase).toBe('question')
     expect(useAppStore.getState().screen).toBe('session')
   })

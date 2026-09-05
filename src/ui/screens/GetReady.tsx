@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { loadWithFallback } from '../../audio/loading'
 import { chordById } from '../../core/content/chords'
 import { awakeChordIds, unlockedChordIds } from '../../core/content/curriculum'
@@ -10,8 +10,10 @@ import { CharacterParade } from '../components/CharacterParade'
 export const MIN_RITUAL_MS = 1500
 export const LISTEN_MS = 800
 export const SLOW_LOAD_MS = 6000
+/** Browsers only start audio from a user gesture; past this wait we ask for a tap. */
+export const UNLOCK_WAIT_MS = 1000
 
-type Stage = 'loading' | 'listen' | 'error'
+type Stage = 'loading' | 'tap' | 'listen' | 'error'
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
 
@@ -25,6 +27,7 @@ export function GetReady() {
   const [stage, setStage] = useState<Stage>('loading')
   const [slow, setSlow] = useState(false)
   const [attempt, setAttempt] = useState(0)
+  const tapped = useRef<(() => void) | null>(null)
 
   useEffect(() => {
     if (!profile) return
@@ -38,13 +41,30 @@ export function GetReady() {
 
     ;(async () => {
       const minimum = sleep(MIN_RITUAL_MS)
-      await player.unlock()
-      const result = await loadWithFallback(
+      // Decoding samples does not need a running context, so loading starts at once.
+      const loading = loadWithFallback(
         player,
         instrument,
         notes,
         instrumentById(DEFAULT_INSTRUMENT_ID),
       )
+      loading.catch(() => {})
+
+      const unlockedQuickly = await Promise.race([
+        player.unlock().then(() => true),
+        sleep(UNLOCK_WAIT_MS).then(() => false),
+      ])
+      if (cancelled) return
+      if (!unlockedQuickly) {
+        setStage('tap')
+        await new Promise<void>((resolve) => {
+          tapped.current = resolve
+        })
+        if (cancelled) return
+        setStage('loading')
+      }
+
+      const result = await loading
       setAudioFallback(
         result.fellBack ? { requested: instrument.id, used: result.instrument.id } : null,
       )
@@ -66,9 +86,16 @@ export function GetReady() {
     return () => {
       cancelled = true
       clearTimeout(slowTimer)
+      tapped.current = null
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attempt, profile?.id])
+
+  async function onTap() {
+    // Called inside the gesture, which is what lets the audio context start.
+    await player.unlock()
+    tapped.current?.()
+  }
 
   if (!profile) return null
   return (
@@ -94,7 +121,13 @@ export function GetReady() {
       ) : (
         <>
           <CharacterParade chordIds={unlockedChordIds(profile.progression.unlocks)} />
-          <p className="muted">{slow ? 'Getting the sounds ready…' : 'Here they come!'}</p>
+          {stage === 'tap' ? (
+            <button className="big-button" onClick={onTap}>
+              👆 Tap to start
+            </button>
+          ) : (
+            <p className="muted">{slow ? 'Getting the sounds ready…' : 'Here they come!'}</p>
+          )}
         </>
       )}
     </div>

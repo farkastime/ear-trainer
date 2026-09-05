@@ -160,9 +160,11 @@ selectable in parent settings. There is no unlock gating in v1.
      before the next chord. A pulsing ear shows in the header from the
      moment a question begins until its chord has finished.
    - **Wrong:** tapped tile shakes gently, a descending two-tone "bee-oop"
-     plays, then the correct tile pulses while its chord replays (the
-     learning moment), ambient heat cools. No penalty, no sad face.
-     Auto-advance once the replay has finished plus a short pause.
+     plays and the correct tile pulses so the child sees the answer; the
+     chord is not replayed. Ambient heat cools. No penalty, no sad face.
+     Auto-advance after 1.8 s.
+   - **No three in a row:** the same chord is never asked more than twice
+     consecutively.
 6. A **Hear again** button replays the current chord at any time. Replays
    are counted but do not affect scoring.
 7. A progress trail shows identifications completed toward the session
@@ -292,8 +294,8 @@ settings (N 3–50, K 10–200, D 0–60, S 0–100).
 When the policy says ready, the unlock happens immediately, mid-session:
 
 1. Session input freezes; ambient heat flares to white-hot.
-2. Full-screen takeover: fireworks barrage, unpitched fanfare (drums,
-   whoosh, cymbal).
+2. Full-screen takeover: fireworks barrage, drum fanfare and a short rising
+   jingle (see §7.4).
 3. The new character is revealed with its name ("Meet Owl!"), its chord plays
    three times in quick succession (1.1 s apart, overlapping slightly) while
    the character dances. Tapping the character replays the chord.
@@ -325,8 +327,8 @@ bigger than the last:
 
 | Tier | Trigger | Effect |
 |---|---|---|
-| 1 | every correct answer | confetti cannon in the chord's colors from just above-left of the first tile (always on screen), spraying across and cascading down, plus a small burst on the tile; character bounce; ambient heat step |
-| 2 | streak milestone (every 5, configurable) | larger burst, ★ awarded, heat ignites further, haptic |
+| 1 | every correct answer | one confetti cannon in the chord's colors from just above-left of the first tile (always on screen), lobbing up and right and drifting down; character bounce; ambient heat step |
+| 2 | streak milestone (every 5, configurable) | the same cannon, bigger and in rainbow colors, ★ awarded, heat ignites further, haptic |
 | 3 | session complete | session summary (§7.3): confetti + fireworks, 1–3 stars by accuracy |
 | 4 | level up | full-screen takeover (§6.3) — the biggest effect in the app |
 
@@ -345,8 +347,9 @@ as atmosphere rather than a gauge the child is told to watch.
   glows strongest.
 - **Streak number:** hidden below 3; from 3 it appears in the header and
   grows and pulses with heat; at 1.0 it shakes ("blazing").
-- **Flames:** from heat ≥ 0.5, flame particles lick in from the bottom edge;
-  intensity scales with heat.
+- **Flames:** from heat ≥ 0.5, flame particles rise gently from the bottom
+  edge on a canvas layered *behind* the tiles, so they colour the room
+  without ever covering a tile; intensity scales with heat.
 - **Miss:** streak → 0; heat drains over ~1 s and the two-tone "bee-oop"
   plays. No particles. Cooling, not punishment.
 - **Sessions start cold.** Heat and streak reset at session start so every
@@ -364,8 +367,8 @@ land where the tiles are on any pixel density.
 
 ### 7.3 Session summary
 
-The end-of-session screen is a celebration, not a scoreboard. Confetti and
-fireworks, stars fly in one at a time (≥95% → 3, ≥80% → 2, else 1), the
+The end-of-session screen is a celebration, not a scoreboard. Confetti,
+fireworks and the session-end jingle, stars fly in one at a time (≥95% → 3, ≥80% → 2, else 1), the
 awake characters cheer, and a short line of encouragement appears. Accuracy
 and count are shown small. Buttons: **Play again**, **Home**. If a level-up
 happened in this session the new character is featured on the card.
@@ -374,9 +377,11 @@ happened in this session the new character is featured on the card.
 
 Celebration sounds are **unpitched** by default (whoosh, pop, drum,
 cymbal): extra tones must not muddy the pitch exposure the app exists to
-deliver. Two exceptions: the chord itself, and the miss "bee-oop", a
-descending two-tone blip kept an octave below the chord vocabulary so it
-cannot be mistaken for a chord.
+deliver. Exceptions, each kept clear of the chord vocabulary (A3–E5): the
+chord itself; the miss "bee-oop", a descending two-tone blip an octave
+below; and two short bell jingles an octave above, a rising one at level-up
+and a four-note tune at session end, so those moments have a signature the
+child recognises.
 Haptics via `navigator.vibrate` where supported.
 
 ### 7.5 Intensity and accessibility

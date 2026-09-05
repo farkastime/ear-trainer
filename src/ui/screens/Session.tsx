@@ -13,11 +13,9 @@ import { StreakBadge } from '../components/StreakBadge'
 import { TileGrid } from '../components/TileGrid'
 import { usePrimer } from '../hooks/usePrimer'
 
-// A correct answer is confirmed visually only; a miss replays the chord while the
-// right tile pulses, and its feedback must outlast that replay.
-export const CONFIRM_SECONDS = 1.5
+// Feedback is visual plus a short sound; the chord is never replayed.
 export const FEEDBACK_CORRECT_MS = 1500
-export const FEEDBACK_WRONG_MS = CONFIRM_SECONDS * 1000 + 700
+export const FEEDBACK_WRONG_MS = 1800
 export const QUESTION_DELAY_MS = 500
 const PRIMER_SECONDS = 1.2
 
@@ -83,7 +81,6 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
   useEffect(() => {
     if (session.phase !== 'feedback') return
     const last = session.answers[session.answers.length - 1]
-    if (!last.correct) play(last.chordId, CONFIRM_SECONDS)
     const t = setTimeout(advance, last.correct ? FEEDBACK_CORRECT_MS : FEEDBACK_WRONG_MS)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -66,6 +66,7 @@ function ask(
       workingSet: workingSetIds(progression, session),
       recentAnswers: progression.recentAnswers,
       lastAskedId: session.lastAskedId,
+      recentAskedIds: session.answers.slice(-2).map((a) => a.chordId),
       newestChordId: newestUnlockedId(progression.unlocks),
     },
     rng,

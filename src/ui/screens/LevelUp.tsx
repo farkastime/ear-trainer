@@ -18,7 +18,10 @@ export function LevelUp() {
 
   useEffect(() => {
     if (!chord || !profile) return
-    if (profile.settings.celebrationSound) sfx.fanfare()
+    if (profile.settings.celebrationSound) {
+      sfx.fanfare()
+      sfx.jingleLevelUp()
+    }
     let cancelled = false
     let timers: ReturnType<typeof setTimeout>[] = []
     const schedulePlays = () => {

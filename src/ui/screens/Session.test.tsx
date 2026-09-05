@@ -3,13 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { chordById } from '../../core/content/chords'
 import { activeProfile, useAppStore } from '../../state/store'
 import { renderApp, resetStore } from '../testing'
-import {
-  CONFIRM_SECONDS,
-  FEEDBACK_CORRECT_MS,
-  FEEDBACK_WRONG_MS,
-  QUESTION_DELAY_MS,
-  Session,
-} from './Session'
+import { FEEDBACK_CORRECT_MS, FEEDBACK_WRONG_MS, QUESTION_DELAY_MS, Session } from './Session'
 
 beforeEach(() => {
   vi.useFakeTimers()
@@ -57,7 +51,7 @@ describe('Session', () => {
     expect(useAppStore.getState().session!.answers).toHaveLength(1)
   })
 
-  it('a wrong tap shakes the tapped tile, pulses and replays the right one, then waits out the replay', () => {
+  it('a wrong tap shakes the tapped tile and pulses the right one, with no replay', () => {
     useAppStore.getState().startSession()
     const { services } = renderApp(<Session />)
     act(() => vi.advanceTimersByTime(AFTER_QUESTION_MS))
@@ -67,13 +61,11 @@ describe('Session', () => {
     expect(tile(wrong).className).toMatch(/shake/)
     expect(tile(asked).className).toMatch(/pulse/)
     const player = services.player as unknown as { played: { notes: string[] }[] }
-    expect(player.played).toHaveLength(2)
-    expect(player.played[1].notes).toEqual(chordById(asked).notes)
-    act(() => vi.advanceTimersByTime(CONFIRM_SECONDS * 1000))
+    expect(player.played).toHaveLength(1)
+    act(() => vi.advanceTimersByTime(FEEDBACK_WRONG_MS - 1))
     expect(useAppStore.getState().session!.phase).toBe('feedback')
-    act(() => vi.advanceTimersByTime(FEEDBACK_WRONG_MS - CONFIRM_SECONDS * 1000))
+    act(() => vi.advanceTimersByTime(1))
     expect(useAppStore.getState().session!.phase).toBe('question')
-    expect(FEEDBACK_WRONG_MS).toBeGreaterThanOrEqual(CONFIRM_SECONDS * 1000 + 500)
   })
 
   it('does not carry a shake target over to the next question', () => {

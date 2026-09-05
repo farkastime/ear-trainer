@@ -48,6 +48,9 @@ describe('emitters', () => {
     expect(hot.count).toBeGreaterThan(warm.count)
     expect(warm.count).toBeGreaterThan(0)
     expect(hot.particles.every((p) => p.y >= 800 - 5 && p.vy < 0)).toBe(true)
+    // Flames sit behind the tiles and rise gently: at full heat no faster than 360 px/s.
+    expect(hot.particles.every((p) => p.layer === 'back')).toBe(true)
+    expect(Math.max(...hot.particles.map((p) => -p.vy))).toBeLessThanOrEqual(360)
   })
 
   it('cannon lobs confetti up and to the right from its origin, slowly enough to fall on screen', () => {

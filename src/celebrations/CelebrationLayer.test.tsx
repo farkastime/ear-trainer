@@ -37,9 +37,13 @@ const summary = {
 describe('CelebrationLayer', () => {
   it('sizes the canvas to the viewport in CSS pixels regardless of device pixel ratio', () => {
     const { container } = renderApp(<CelebrationLayer system={new ParticleSystem(10)} />)
-    const canvas = container.querySelector('canvas')!
-    expect(canvas.style.width).toBe('100%')
-    expect(canvas.style.height).toBe('100%')
+    const canvases = Array.from(container.querySelectorAll('canvas'))
+    expect(canvases).toHaveLength(2)
+    expect(canvases[0].className).toContain('back')
+    for (const canvas of canvases) {
+      expect(canvas.style.width).toBe('100%')
+      expect(canvas.style.height).toBe('100%')
+    }
   })
 
   it('fires confetti on a correct answer; a miss plays the wrong sound with no particles', () => {
@@ -81,7 +85,7 @@ describe('CelebrationLayer', () => {
     expect(system.count).toBe(6)
     act(() => emitEngineEvents([{ type: 'sessionComplete', summary }]))
     expect(system.count).toBeGreaterThan(100)
-    expect(sfx.calls).toEqual(['cymbal'])
+    expect(sfx.calls).toEqual(['cymbal', 'jingleSessionEnd'])
   })
 
   it('respects intensity and sound settings', () => {

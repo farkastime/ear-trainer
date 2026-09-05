@@ -10,6 +10,8 @@ export interface Sfx {
   steam(): void
   wrong(): void
   fanfare(): void
+  jingleLevelUp(): void
+  jingleSessionEnd(): void
 }
 
 export function createNullSfx(): Sfx & { calls: string[] } {
@@ -24,14 +26,33 @@ export function createNullSfx(): Sfx & { calls: string[] } {
     steam: rec('steam'),
     wrong: rec('wrong'),
     fanfare: rec('fanfare'),
+    jingleLevelUp: rec('jingleLevelUp'),
+    jingleSessionEnd: rec('jingleSessionEnd'),
   }
 }
+
+// Jingles live an octave above the chord vocabulary (highest chord note E5).
+const LEVEL_UP_JINGLE: [string, number][] = [
+  ['C6', 0],
+  ['E6', 0.12],
+  ['G6', 0.24],
+  ['C7', 0.36],
+  ['G6', 0.6],
+  ['C7', 0.72],
+]
+const SESSION_END_JINGLE: [string, number][] = [
+  ['G6', 0],
+  ['E6', 0.15],
+  ['G6', 0.3],
+  ['C7', 0.45],
+]
 
 export function createToneSfx(): Sfx {
   let noise: Tone.NoiseSynth | null = null
   let metal: Tone.MetalSynth | null = null
   let drum: Tone.MembraneSynth | null = null
   let blip: Tone.Synth | null = null
+  let bell: Tone.Synth | null = null
   let filter: Tone.Filter | null = null
   const lastStart: Record<string, number> = {}
 
@@ -60,6 +81,15 @@ export function createToneSfx(): Sfx {
       envelope: { attack: 0.01, decay: 0.15, sustain: 0.4, release: 0.15 },
     }).toDestination()
     blip.volume.value = -10
+    bell = new Tone.Synth({
+      oscillator: { type: 'sine' },
+      envelope: { attack: 0.005, decay: 0.25, sustain: 0.1, release: 0.4 },
+    }).toDestination()
+    bell.volume.value = -8
+  }
+
+  function playJingle(notes: [string, number][]) {
+    for (const [note, offset] of notes) bell!.triggerAttackRelease(note, 0.2, at('bell', offset))
   }
 
   // Tone sources throw if started at or before their previous start time, so
@@ -115,6 +145,12 @@ export function createToneSfx(): Sfx {
         blip!.triggerAttackRelease('E3', 0.18, at('blip'))
         blip!.triggerAttackRelease('A2', 0.35, at('blip', 0.2))
       })
+    },
+    jingleLevelUp() {
+      safely(() => playJingle(LEVEL_UP_JINGLE))
+    },
+    jingleSessionEnd() {
+      safely(() => playJingle(SESSION_END_JINGLE))
     },
     fanfare() {
       safely(() => {

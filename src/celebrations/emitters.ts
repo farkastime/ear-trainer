@@ -141,7 +141,7 @@ export function flames(
       x: Math.random() * width,
       y: height,
       count: 1,
-      speed: [80 + 200 * heat, 160 + 320 * heat],
+      speed: [60 + 150 * heat, 120 + 240 * heat],
       angle: [UP - 0.25, UP + 0.25],
       life: [0.5, 1.0 + heat],
       size: [3, 6 + 6 * heat],
@@ -149,6 +149,7 @@ export function flames(
       gravity: -80,
       drag: 1.0,
       shape: 'circle',
+      layer: 'back',
     })
   }
 }

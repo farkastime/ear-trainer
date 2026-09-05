@@ -104,6 +104,20 @@ describe('createToneSfx', () => {
     expect(by('drum').starts).toHaveLength(0)
   })
 
+  it('jingles play their notes in strictly increasing time on the bell synth', () => {
+    const sfx = createToneSfx()
+    sfx.jingleLevelUp()
+    sfx.jingleSessionEnd()
+    const bells = synths.filter((s) => s.kind === 'blip')
+    // Two Synth instances exist: the miss blip (created first) and the jingle bell.
+    expect(bells).toHaveLength(2)
+    const bell = bells[1]
+    expect(bell.starts).toHaveLength(6 + 4)
+    for (let i = 1; i < bell.starts.length; i++) {
+      expect(bell.starts[i]).toBeGreaterThan(bell.starts[i - 1])
+    }
+  })
+
   it('later real time wins over the monotonic floor', () => {
     const sfx = createToneSfx()
     sfx.pop()

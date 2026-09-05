@@ -1,8 +1,11 @@
 import type { Rng } from '../core/engine/rng'
 
 export type Shape = 'circle' | 'rect' | 'spark'
+/** Which canvas a particle is drawn on: `back` sits behind the tiles, `front` above everything. */
+export type Layer = 'back' | 'front'
 
 export interface Particle {
+  layer: Layer
   x: number
   y: number
   vx: number
@@ -33,6 +36,7 @@ export interface EmitSpec {
   drag?: number
   shape?: Shape
   trail?: boolean
+  layer?: Layer
   onDeath?: (p: Particle) => void
 }
 
@@ -69,6 +73,7 @@ export class ParticleSystem {
       const angle = this.range(spec.angle)
       const life = this.range(spec.life)
       this.particles.push({
+        layer: spec.layer ?? 'front',
         x: spec.x,
         y: spec.y,
         vx: Math.cos(angle) * speed,
@@ -126,13 +131,15 @@ export class ParticleSystem {
           colors: [p.color],
           shape: 'spark',
           gravity: 30,
+          layer: p.layer,
         })
       }
     }
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
+  draw(ctx: CanvasRenderingContext2D, layer?: Layer): void {
     for (const p of this.particles) {
+      if (layer && p.layer !== layer) continue
       const alpha = Math.max(0, Math.min(1, p.life / p.maxLife))
       ctx.save()
       ctx.globalAlpha = alpha

@@ -56,6 +56,41 @@ describe('ParticleSystem', () => {
     expect(sys.particles.filter((p) => !p.trail).length).toBe(1)
   })
 
+  it('draws only the requested layer when asked, and trails inherit their parent layer', () => {
+    const sys = new ParticleSystem(100, mulberry32(1))
+    sys.emit(spec({ count: 3, layer: 'back', shape: 'circle' }))
+    sys.emit(spec({ count: 2, shape: 'circle' }))
+    const arc = vi.fn()
+    const ctx = {
+      save: vi.fn(),
+      restore: vi.fn(),
+      translate: vi.fn(),
+      rotate: vi.fn(),
+      beginPath: vi.fn(),
+      arc,
+      fill: vi.fn(),
+      fillRect: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      stroke: vi.fn(),
+      fillStyle: '',
+      strokeStyle: '',
+      globalAlpha: 1,
+      lineWidth: 1,
+    } as unknown as CanvasRenderingContext2D
+    sys.draw(ctx, 'back')
+    expect(arc).toHaveBeenCalledTimes(3)
+    sys.draw(ctx, 'front')
+    expect(arc).toHaveBeenCalledTimes(5)
+    sys.draw(ctx)
+    expect(arc).toHaveBeenCalledTimes(10)
+
+    const trails = new ParticleSystem(100, mulberry32(1))
+    trails.emit(spec({ count: 1, trail: true, layer: 'back', life: [1, 1] }))
+    trails.tick(0.05)
+    expect(trails.particles.every((p) => p.layer === 'back')).toBe(true)
+  })
+
   it('setMax trims the population', () => {
     const sys = new ParticleSystem(50, mulberry32(1))
     sys.emit(spec({ count: 50 }))

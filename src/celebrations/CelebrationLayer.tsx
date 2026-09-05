@@ -5,14 +5,13 @@ import { onEngineEvent } from '../state/eventBus'
 import { activeProfile, useAppStore } from '../state/store'
 import { useAudio } from '../ui/AudioContext'
 import { useReducedMotion } from '../ui/hooks/useReducedMotion'
-import { anchorCenter, anchorRect } from './anchors'
-import { burst, cannon, confetti, firework, flames, fountain } from './emitters'
+import { anchorRect } from './anchors'
+import { cannon, confetti, firework, flames } from './emitters'
 import { vibrate } from './haptics'
 import { ParticleSystem } from './particles'
 import { effectiveIntensity, intensityScale, moodPalette } from './presets'
 
 const CONFETTI_COLORS = ['#ffd54f', '#4fc3f7', '#ff7043', '#66bb6a', '#ba68c8']
-const MILESTONE_COLORS = ['#ffd54f', '#ffffff', '#ff7043']
 const BARRAGE = 6
 const BARRAGE_GAP_MS = 250
 const SLOW_FRAME_S = 0.032
@@ -20,7 +19,8 @@ const SLOW_FRAMES_BEFORE_CAP = 30
 const REDUCED_MAX = 600
 
 export function CelebrationLayer({ system }: { system?: ParticleSystem }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const backRef = useRef<HTMLCanvasElement>(null)
+  const frontRef = useRef<HTMLCanvasElement>(null)
   const sysRef = useRef(system ?? new ParticleSystem())
   const { sfx } = useAudio()
   const reduced = useReducedMotion()
@@ -41,10 +41,9 @@ export function CelebrationLayer({ system }: { system?: ParticleSystem }) {
       const sys = sysRef.current
       const w = window.innerWidth
       const h = window.innerHeight
-      const at = (id: string) => anchorCenter(id) ?? { x: w / 2, y: h / 2 }
-      // The confetti cannon sits just up and left of the first tile, a spot that is
-      // always on screen whatever the grid size.
-      const cannonOrigin = () => {
+      // Every in-session celebration fires from one spot just up and left of the
+      // first tile, which is always on screen whatever the grid size.
+      const origin = () => {
         const r = firstTileId ? anchorRect(firstTileId) : null
         return r
           ? { x: Math.max(8, r.left - 12), y: Math.max(8, r.top - 12) }
@@ -58,10 +57,8 @@ export function CelebrationLayer({ system }: { system?: ParticleSystem }) {
       switch (e.type) {
         case 'answered': {
           if (e.correct) {
-            const o = cannonOrigin()
+            const o = origin()
             cannon(sys, o.x, o.y, palette(e.chordId), scale)
-            const p = at(e.chordId)
-            burst(sys, p.x, p.y, palette(e.chordId), scale * 0.4)
             if (sound) sfx.pop()
             vibrate([20], haptics)
           } else if (sound) {
@@ -69,14 +66,16 @@ export function CelebrationLayer({ system }: { system?: ParticleSystem }) {
           }
           break
         }
-        case 'streakMilestone':
-          fountain(sys, w / 2, h * 0.8, MILESTONE_COLORS, scale)
+        case 'streakMilestone': {
+          const o = origin()
+          cannon(sys, o.x, o.y, CONFETTI_COLORS, scale * 1.6)
           if (sound) sfx.whoosh()
           vibrate([30, 50, 30], haptics)
           break
+        }
         case 'chordWoken': {
-          const p = at(e.chordId)
-          burst(sys, p.x, p.y, palette(e.chordId), scale * 2)
+          const o = origin()
+          cannon(sys, o.x, o.y, palette(e.chordId), scale * 1.6)
           if (sound) sfx.whoosh()
           break
         }
@@ -108,7 +107,10 @@ export function CelebrationLayer({ system }: { system?: ParticleSystem }) {
               ),
             )
           }
-          if (sound) sfx.cymbal()
+          if (sound) {
+            sfx.cymbal()
+            sfx.jingleSessionEnd()
+          }
           vibrate([40, 60, 40], haptics)
           break
         default:
@@ -122,9 +124,11 @@ export function CelebrationLayer({ system }: { system?: ParticleSystem }) {
   }, [sfx])
 
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
+    const back = backRef.current
+    const front = frontRef.current
+    if (!back || !front) return
+    const canvases = [back, front]
+    const contexts = canvases.map((c) => c.getContext('2d'))
     const sys = sysRef.current
     let raf = 0
     let last = performance.now()
@@ -132,9 +136,11 @@ export function CelebrationLayer({ system }: { system?: ParticleSystem }) {
 
     const resize = () => {
       const dpr = Math.min(2, window.devicePixelRatio || 1)
-      canvas.width = window.innerWidth * dpr
-      canvas.height = window.innerHeight * dpr
-      ctx?.setTransform(dpr, 0, 0, dpr, 0, 0)
+      canvases.forEach((c, i) => {
+        c.width = window.innerWidth * dpr
+        c.height = window.innerHeight * dpr
+        contexts[i]?.setTransform(dpr, 0, 0, dpr, 0, 0)
+      })
     }
     resize()
     window.addEventListener('resize', resize)
@@ -147,9 +153,14 @@ export function CelebrationLayer({ system }: { system?: ParticleSystem }) {
       if (screen === 'session' && intensity !== 'calm')
         flames(sys, window.innerWidth, window.innerHeight, heat, dt)
       sys.tick(dt)
-      if (ctx) {
-        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight)
-        sys.draw(ctx)
+      const [backCtx, frontCtx] = contexts
+      if (backCtx) {
+        backCtx.clearRect(0, 0, window.innerWidth, window.innerHeight)
+        sys.draw(backCtx, 'back')
+      }
+      if (frontCtx) {
+        frontCtx.clearRect(0, 0, window.innerWidth, window.innerHeight)
+        sys.draw(frontCtx, 'front')
       }
       if (dt > SLOW_FRAME_S) {
         if (++slowFrames >= SLOW_FRAMES_BEFORE_CAP) sys.setMax(REDUCED_MAX)
@@ -167,12 +178,11 @@ export function CelebrationLayer({ system }: { system?: ParticleSystem }) {
 
   // Explicit CSS size: a canvas otherwise displays at its pixel size, which is
   // devicePixelRatio times the viewport and pushes everything off screen on phones.
+  const size = { width: '100%', height: '100%' }
   return (
-    <canvas
-      ref={canvasRef}
-      className="celebration-canvas"
-      style={{ width: '100%', height: '100%' }}
-      aria-hidden="true"
-    />
+    <>
+      <canvas ref={backRef} className="celebration-canvas back" style={size} aria-hidden="true" />
+      <canvas ref={frontRef} className="celebration-canvas" style={size} aria-hidden="true" />
+    </>
   )
 }

@@ -428,6 +428,14 @@ button {
   pointer-events: none;
   z-index: 30;
 }
+/* The back canvas carries the heat flames; session content stacks above it. */
+.celebration-canvas.back {
+  z-index: 0;
+}
+.session > * {
+  position: relative;
+  z-index: 1;
+}
 
 /* parent */
 .settings-section h3 {

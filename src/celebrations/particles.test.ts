@@ -32,7 +32,7 @@ describe('ParticleSystem', () => {
     sys.tick(0.1)
     const p = sys.particles[0]
     expect(p.x).toBeCloseTo(1)
-    expect(p.vy).toBeCloseTo(10)
+    expect(p.vy).toBeCloseTo(10 * (1 - 0.5 * 0.1))
     expect(p.vx).toBeCloseTo(10 * (1 - 0.5 * 0.1))
     expect(p.life).toBeCloseTo(1.9)
   })

@@ -96,6 +96,7 @@ export class ParticleSystem {
       p.y += p.vy * dt
       p.vy += p.gravity * dt
       p.vx *= 1 - p.drag * dt
+      p.vy *= 1 - p.drag * dt
       p.rotation += p.spin * dt
       p.life -= dt
       if (p.life <= 0) dead.push(p)

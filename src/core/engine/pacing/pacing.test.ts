@@ -135,6 +135,16 @@ describe('eguchi', () => {
     })
     expect(v.ready).toBe(true)
   })
+  it('is never ready with no unlocks', () => {
+    const p = progression({ unlocks: [], recentAnswers: answers(4) })
+    const v = eguchi(input({ progression: p, now: 100 * DAY }), {
+      ...params,
+      eguchiDays: 0,
+      eguchiSessions: 0,
+    })
+    expect(v.ready).toBe(false)
+    expect(v.reason).toMatch(/no unlocked/)
+  })
 })
 
 describe('manual', () => {

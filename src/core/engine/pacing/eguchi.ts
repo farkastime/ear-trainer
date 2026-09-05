@@ -5,6 +5,9 @@ const DAY_MS = 24 * 60 * 60 * 1000
 
 export const eguchi: PacingPolicy = (input, params) => {
   const { progression, now } = input
+  if (progression.unlocks.length === 0) {
+    return { ready: false, reason: 'no unlocked chords' }
+  }
   const window = lastN(progression.recentAnswers, params.eguchiWindow)
   const misses = window.filter((a) => !a.correct).length
   if (window.length < params.eguchiWindow || misses > 0) {

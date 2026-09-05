@@ -309,9 +309,8 @@ When the policy says ready, the unlock happens immediately, mid-session:
 2. Full-screen takeover: fireworks that keep launching (one every 0.7 s) for
    as long as the screen is up, a drum fanfare and a short rising jingle
    (see §7.4).
-3. A locked tile (🔒) in the new chord's colour shakes, flashes white and
-   reveals the character with its name ("Meet Owl!") about 0.9 s in, on the
-   jingle's last note. Nothing plays automatically: "Tap to hear it", and
+3. A locked tile (🔒) in the new chord's colour shakes for 2 s, flashes
+   white and reveals the character with its name ("Meet Owl!") at 2.4 s. Nothing plays automatically: "Tap to hear it", and
    tapping the tile plays the chord. Continue is enabled once revealed.
 4. A **Continue** tap returns to the session screen with the new tile added
    in curriculum position, bouncing and glowing.

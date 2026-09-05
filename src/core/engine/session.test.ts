@@ -1,9 +1,9 @@
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { DEFAULT_CURRICULUM } from '../content/curriculum'
 import { makeProfile } from '../testing/fixtures'
 import type { Profile, SessionSummary } from '../types'
 import type { EngineEvent } from './events'
-import { mulberry32 } from './rng'
+import { mulberry32, type Rng } from './rng'
 import {
   advance,
   answer,
@@ -17,8 +17,11 @@ import {
 } from './session'
 
 const DAY = 24 * 60 * 60 * 1000
-// One RNG stream for the whole file so consecutive questions vary.
-const rng = mulberry32(11)
+// Reseeded before every test so tests are order-independent.
+let rng: Rng
+beforeEach(() => {
+  rng = mulberry32(11)
+})
 const deps = (now = 1000): EngineDeps => ({ now, rng })
 const types = (events: EngineEvent[]) => events.map((e) => e.type)
 

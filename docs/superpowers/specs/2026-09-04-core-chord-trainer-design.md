@@ -313,8 +313,9 @@ When the policy says ready, the unlock happens immediately, mid-session:
    (see §7.4).
 3. A locked tile (🔒) in the new chord's colour shakes for 2 s, then the
    whole screen flashes white and the character is revealed with its name
-   ("Meet Owl!") at peak brightness, 2.2 s in. Nothing plays automatically: "Tap to hear it", and
-   tapping the tile plays the chord. Continue is enabled once revealed.
+   ("Meet Owl!") at peak brightness, 2.2 s in. Once revealed, its chord
+   plays three times (1.1 s apart), well after the jingle has ended; tapping
+   the tile plays it again. Continue is enabled once revealed.
 4. A **Continue** tap returns to the session screen with the new tile added
    in curriculum position, bouncing and glowing.
 5. **Continue** closes the interrupted session quietly (it is recorded with

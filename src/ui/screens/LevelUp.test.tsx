@@ -4,7 +4,7 @@ import { createNullPlayer } from '../../audio/player'
 import { createNullSfx } from '../../audio/sfx'
 import { useAppStore } from '../../state/store'
 import { renderApp, resetStore } from '../testing'
-import { LevelUp, UNLOCK_ANIM_MS } from './LevelUp'
+import { FIRST_PLAY_DELAY_MS, LevelUp, PLAY_GAP_MS, UNLOCK_ANIM_MS } from './LevelUp'
 
 beforeEach(() => {
   vi.useFakeTimers()
@@ -29,7 +29,7 @@ const flush = async (ms: number) => {
 }
 
 describe('LevelUp', () => {
-  it('shakes a locked tile, then reveals the character, which plays only when tapped', async () => {
+  it('shakes a locked tile, reveals the character, then plays its chord three times', async () => {
     expect(useAppStore.getState().session?.phase).toBe('levelUp')
     const player = createNullPlayer()
     const sfx = createNullSfx()
@@ -46,10 +46,14 @@ describe('LevelUp', () => {
     expect(screen.getByText(/meet whale/i)).toBeInTheDocument()
     expect(player.played).toHaveLength(0)
 
-    await flush(3000)
-    expect(player.played).toHaveLength(0)
-    fireEvent.click(tile)
+    await flush(FIRST_PLAY_DELAY_MS)
     expect(player.played).toHaveLength(1)
+    await flush(PLAY_GAP_MS * 2)
+    expect(player.played).toHaveLength(3)
+    await flush(3000)
+    expect(player.played).toHaveLength(3)
+    fireEvent.click(tile)
+    expect(player.played).toHaveLength(4)
 
     fireEvent.click(screen.getByRole('button', { name: /continue/i }))
     expect(useAppStore.getState().session?.phase).toBe('question')

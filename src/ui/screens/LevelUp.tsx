@@ -9,6 +9,10 @@ import { useAudio } from '../AudioContext'
 const REVEAL_SECONDS = 1.4
 /** Two seconds of shaking, then the screen flashes; the character appears at peak white. Matches the CSS unlock timing. */
 export const UNLOCK_ANIM_MS = 2200
+/** Once revealed (the jingle is long over by then), the new chord plays three times. */
+export const FIRST_PLAY_DELAY_MS = 300
+export const PLAY_GAP_MS = 1100
+const PLAYS = 3
 
 export function LevelUp() {
   const profile = useAppStore(activeProfile)
@@ -27,8 +31,6 @@ export function LevelUp() {
       sfx.fanfare()
       sfx.jingleLevelUp(key)
     }
-    // Load the new chord's samples now so the first tap plays with the right timbre;
-    // nothing plays automatically, the child taps the character to hear it.
     const instrument = instrumentById(profile.settings.instrumentId)
     loadWithFallback(
       player,
@@ -37,8 +39,12 @@ export function LevelUp() {
       instrumentById(DEFAULT_INSTRUMENT_ID),
     ).catch(() => {})
     setRevealed(false)
-    const t = setTimeout(() => setRevealed(true), UNLOCK_ANIM_MS)
-    return () => clearTimeout(t)
+    const play = () => player.playChord([...chord.notes], REVEAL_SECONDS)
+    const timers = [setTimeout(() => setRevealed(true), UNLOCK_ANIM_MS)]
+    for (let i = 0; i < PLAYS; i++) {
+      timers.push(setTimeout(play, UNLOCK_ANIM_MS + FIRST_PLAY_DELAY_MS + i * PLAY_GAP_MS))
+    }
+    return () => timers.forEach(clearTimeout)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chord?.id])
 
@@ -64,7 +70,7 @@ export function LevelUp() {
         <span>{revealed ? chord.character.emoji : '🔒'}</span>
       </button>
       <p className="muted" style={{ margin: 0, minHeight: '1.5em' }}>
-        {revealed ? 'Tap to hear it' : ''}
+        {revealed ? 'Tap to hear it again' : ''}
       </p>
       <button className="big-button" onClick={continueAfterLevelUp} disabled={!revealed}>
         Continue

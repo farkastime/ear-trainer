@@ -9,7 +9,6 @@ import { activeProfile, useAppStore } from '../../state/store'
 import { useAudio } from '../AudioContext'
 import { ChordTile, type TileFlash } from '../components/ChordTile'
 import { ProgressTrail } from '../components/ProgressTrail'
-import { StreakBadge } from '../components/StreakBadge'
 import { TileGrid } from '../components/TileGrid'
 import { usePrimer } from '../hooks/usePrimer'
 
@@ -135,7 +134,6 @@ function SessionView({ session, profile }: { session: SessionState; profile: Pro
           🔊
         </button>
       </div>
-      <StreakBadge streak={progression.streak} heat={progression.heat} />
       <ProgressTrail answers={session.answers} target={session.target} />
       <TileGrid count={unlocked.length}>
         {unlocked.map((id) => (

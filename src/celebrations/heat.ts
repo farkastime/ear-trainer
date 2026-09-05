@@ -4,6 +4,8 @@ const STOPS: [number, [number, number, number]][] = [
   [1, [255, 250, 235]],
 ]
 
+const MAX_GLOW_PX = 120
+
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x))
 
 export function heatColor(heat: number): string {
@@ -17,11 +19,16 @@ export function heatColor(heat: number): string {
   return `rgb(${mix(a[0], b[0])}, ${mix(a[1], b[1])}, ${mix(a[2], b[2])})`
 }
 
+/** Glow width grows with the square root of heat so the first correct answer already shows. */
+export function heatGlowPx(heat: number): number {
+  return Math.round(MAX_GLOW_PX * Math.sqrt(clamp01(heat)))
+}
+
 export function heatVars(heat: number): Record<string, string> {
   const h = clamp01(heat)
   return {
     '--heat': String(h),
     '--heat-color': heatColor(h),
-    '--heat-glow': `${Math.round(h * 90)}px`,
+    '--heat-glow': `${heatGlowPx(h)}px`,
   }
 }

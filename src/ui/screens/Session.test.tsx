@@ -122,16 +122,23 @@ describe('Session', () => {
     expect(useAppStore.getState().screen).toBe('summary')
   })
 
-  it('shows the streak badge from 3 and the trail fills', () => {
+  it('warms the room from the first correct answer, with no streak counter', () => {
     useAppStore.getState().updateSettings({ pacing: 'manual' })
     useAppStore.getState().startSession()
     renderApp(<Session />)
-    expect(screen.queryByTestId('streak-badge')).toBeNull()
-    for (let i = 0; i < 3; i++) {
+    const glow = () => screen.getByTestId('screen-session').style.getPropertyValue('--heat-glow')
+    expect(glow()).toBe('0px')
+    fireEvent.click(tile(current()))
+    act(() => vi.advanceTimersByTime(FEEDBACK_CORRECT_MS))
+    const afterOne = parseInt(glow(), 10)
+    expect(afterOne).toBeGreaterThan(0)
+    for (let i = 0; i < 2; i++) {
       fireEvent.click(tile(current()))
       act(() => vi.advanceTimersByTime(FEEDBACK_CORRECT_MS))
     }
-    expect(screen.getByTestId('streak-badge').textContent).toContain('3')
+    expect(parseInt(glow(), 10)).toBeGreaterThan(afterOne)
+    expect(screen.queryByTestId('streak-badge')).toBeNull()
+    expect(screen.queryByText(/🔥/)).toBeNull()
     expect(
       screen.getAllByTestId('trail-dot').filter((d) => d.className.includes('correct')),
     ).toHaveLength(3)

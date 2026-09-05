@@ -340,13 +340,15 @@ There is no meter object. The streak heats the *room*: the session screen
 itself changes, in the spirit of Balatro's score fire, so the effect reads
 as atmosphere rather than a gauge the child is told to watch.
 
-- `heat = min(1, streak / 15)` with easing.
+- `heat = min(1, streak / 15)`; the glow width follows the square root of
+  heat, so the very first correct answer already warms the edges and every
+  further one adds to it gradually. Nothing appears suddenly at a threshold.
 - **Edges:** a vignette around the screen edge shifts from neutral through
   amber and orange to white-hot as heat rises.
 - **Tiles:** pick up a glow in the same palette; the just-answered tile
   glows strongest.
-- **Streak number:** hidden below 3; from 3 it appears in the header and
-  grows and pulses with heat; at 1.0 it shakes ("blazing").
+- **No counter:** the streak is never shown as a number during play; the
+  room's warmth is the only indicator. Best streak lives in parent stats.
 - **Flames:** from heat ≥ 0.5, flame particles rise gently from the bottom
   edge on a canvas layered *behind* the tiles, so they colour the room
   without ever covering a tile; intensity scales with heat.
@@ -431,12 +433,14 @@ flames; the heat vignette still shifts color). Celebration sound has its own on/
 2. **Home** — big Play, strip of unlocked characters (napping one shown
    asleep), star total, gear (parent gate). Champion badge when applicable.
 3. **Get-ready** — character parade and "Listen!" cue (§5.3).
-4. **Session** — chord tiles, ambient heat vignette, streak number in the
-   header, progress trail, hear-again, exit.
+4. **Session** — chord tiles (emoji filling half the tile), ambient heat
+   vignette, listening cue, progress trail, hear-again, exit.
 5. **Level-up takeover** — overlay and primer (§6.3).
 6. **Session summary** — §7.3.
 7. **Parent settings** — §9.
 
+The app is dark-themed: a deep grey with a hint of purple (`#262231`) as the
+ground, light text, and the chord colors carrying all the saturation.
 Portrait phone first; tablet and desktop layouts widen the tile grid. Tile
 grid is 2 columns up to 4 chords, 3 columns up to 9, 4 columns beyond.
 

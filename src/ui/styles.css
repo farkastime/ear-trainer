@@ -50,9 +50,8 @@ button {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  /* Clears the fixed header bar. */
-  padding: calc(env(safe-area-inset-top) + var(--header-h) + 12px) 16px
-    max(16px, env(safe-area-inset-bottom));
+  /* Clears the fixed header bar. The status bar is opaque, so no top inset applies. */
+  padding: calc(var(--header-h) + 12px) 16px max(16px, env(safe-area-inset-bottom));
   gap: 16px;
   position: relative;
 }
@@ -62,8 +61,7 @@ button {
   left: 0;
   right: 0;
   margin: 0;
-  padding-top: env(safe-area-inset-top);
-  height: calc(env(safe-area-inset-top) + var(--header-h));
+  height: var(--header-h);
   line-height: var(--header-h);
   background: var(--header-bg);
   text-align: center;
@@ -645,11 +643,11 @@ button {
 }
 /* Below the header bar, top-left; the trail starts under it. */
 .session {
-  padding-top: calc(env(safe-area-inset-top) + var(--header-h) + 56px);
+  padding-top: calc(var(--header-h) + 56px);
 }
 .session > .stop-button {
   position: fixed;
-  top: calc(env(safe-area-inset-top) + var(--header-h) + 8px);
+  top: calc(var(--header-h) + 8px);
   left: 10px;
   z-index: 3;
   width: 40px;

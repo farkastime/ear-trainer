@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { anchorCenter, registerAnchor } from './anchors'
+import { anchorCenter, anchorRect, registerAnchor } from './anchors'
 
 describe('anchors', () => {
   it('returns the bounding-rect center of a registered element', () => {
@@ -15,6 +15,16 @@ describe('anchors', () => {
     registerAnchor('b', el)
     registerAnchor('b', null)
     expect(anchorCenter('b')).toBeNull()
+  })
+
+  it('returns the bounding rect of a registered element', () => {
+    const el = document.createElement('div')
+    el.getBoundingClientRect = () =>
+      ({ left: 10, top: 20, width: 100, height: 50, right: 110, bottom: 70 }) as DOMRect
+    registerAnchor('rect', el)
+    expect(anchorRect('rect')).toEqual({ left: 10, top: 20, width: 100, height: 50 })
+    expect(anchorRect('missing')).toBeNull()
+    registerAnchor('rect', null)
   })
 
   it('returns null for an unknown id', () => {

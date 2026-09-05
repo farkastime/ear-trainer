@@ -8,6 +8,7 @@ export interface Sfx {
   thud(): void
   cymbal(): void
   steam(): void
+  wrong(): void
   fanfare(): void
 }
 
@@ -21,6 +22,7 @@ export function createNullSfx(): Sfx & { calls: string[] } {
     thud: rec('thud'),
     cymbal: rec('cymbal'),
     steam: rec('steam'),
+    wrong: rec('wrong'),
     fanfare: rec('fanfare'),
   }
 }
@@ -98,6 +100,15 @@ export function createToneSfx(): Sfx {
         filter!.frequency.value = 800
         noise!.envelope.decay = 0.9
         noise!.triggerAttackRelease(0.8, at('noise'))
+      })
+    },
+    wrong() {
+      // A falling noise sweep reads as "not quite" without adding a pitch to the lesson.
+      safely(() => {
+        filter!.frequency.value = 1400
+        filter!.frequency.rampTo(250, 0.45)
+        noise!.envelope.decay = 0.5
+        noise!.triggerAttackRelease(0.45, at('noise'))
       })
     },
     fanfare() {

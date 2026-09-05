@@ -5,8 +5,8 @@ import { onEngineEvent } from '../state/eventBus'
 import { activeProfile, useAppStore } from '../state/store'
 import { useAudio } from '../ui/AudioContext'
 import { useReducedMotion } from '../ui/hooks/useReducedMotion'
-import { anchorCenter } from './anchors'
-import { burst, confetti, firework, flames, fountain, steam } from './emitters'
+import { anchorCenter, anchorRect } from './anchors'
+import { burst, cannon, confetti, firework, flames, fountain } from './emitters'
 import { vibrate } from './haptics'
 import { ParticleSystem } from './particles'
 import { effectiveIntensity, intensityScale, moodPalette } from './presets'
@@ -27,13 +27,14 @@ export function CelebrationLayer({ system }: { system?: ParticleSystem }) {
   const settings = useAppStore((s) => activeProfile(s)?.settings)
   const heat = useAppStore((s) => activeProfile(s)?.progression.heat ?? 0)
   const screen = useAppStore((s) => s.screen)
-  const live = useRef({ settings, reduced, heat, screen })
-  live.current = { settings, reduced, heat, screen }
+  const firstTileId = useAppStore((s) => activeProfile(s)?.progression.unlocks[0]?.chordId ?? null)
+  const live = useRef({ settings, reduced, heat, screen, firstTileId })
+  live.current = { settings, reduced, heat, screen, firstTileId }
 
   useEffect(() => {
     const timers: ReturnType<typeof setTimeout>[] = []
     const off = onEngineEvent((e: EngineEvent) => {
-      const { settings, reduced } = live.current
+      const { settings, reduced, firstTileId } = live.current
       const scale = intensityScale(effectiveIntensity(settings?.intensity ?? 'full', reduced))
       const sound = settings?.celebrationSound ?? true
       const haptics = settings?.haptics ?? true
@@ -41,6 +42,14 @@ export function CelebrationLayer({ system }: { system?: ParticleSystem }) {
       const w = window.innerWidth
       const h = window.innerHeight
       const at = (id: string) => anchorCenter(id) ?? { x: w / 2, y: h / 2 }
+      // The confetti cannon sits just up and left of the first tile, a spot that is
+      // always on screen whatever the grid size.
+      const cannonOrigin = () => {
+        const r = firstTileId ? anchorRect(firstTileId) : null
+        return r
+          ? { x: Math.max(8, r.left - 12), y: Math.max(8, r.top - 12) }
+          : { x: w * 0.08, y: h * 0.3 }
+      }
       const palette = (id: string) => {
         const c = chordById(id)
         return moodPalette(c.character.mood, c.color)
@@ -49,13 +58,14 @@ export function CelebrationLayer({ system }: { system?: ParticleSystem }) {
       switch (e.type) {
         case 'answered': {
           if (e.correct) {
+            const o = cannonOrigin()
+            cannon(sys, o.x, o.y, palette(e.chordId), scale)
             const p = at(e.chordId)
-            burst(sys, p.x, p.y, palette(e.chordId), scale)
+            burst(sys, p.x, p.y, palette(e.chordId), scale * 0.4)
             if (sound) sfx.pop()
             vibrate([20], haptics)
-          } else {
-            steam(sys, w, h, scale)
-            if (sound) sfx.steam()
+          } else if (sound) {
+            sfx.wrong()
           }
           break
         }
@@ -155,5 +165,14 @@ export function CelebrationLayer({ system }: { system?: ParticleSystem }) {
     }
   }, [])
 
-  return <canvas ref={canvasRef} className="celebration-canvas" aria-hidden="true" />
+  // Explicit CSS size: a canvas otherwise displays at its pixel size, which is
+  // devicePixelRatio times the viewport and pushes everything off screen on phones.
+  return (
+    <canvas
+      ref={canvasRef}
+      className="celebration-canvas"
+      style={{ width: '100%', height: '100%' }}
+      aria-hidden="true"
+    />
+  )
 }

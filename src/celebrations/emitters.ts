@@ -82,6 +82,29 @@ export function firework(
   })
 }
 
+/** Confetti cannon: sprays rightward and slightly upward from one point, then falls. */
+export function cannon(
+  sys: ParticleSystem,
+  x: number,
+  y: number,
+  colors: string[],
+  scale = 1,
+): void {
+  sys.emit({
+    x,
+    y,
+    count: Math.round(60 * scale),
+    speed: [350, 750],
+    angle: [-0.55, 0.35],
+    life: [1.4, 2.4],
+    size: [4, 8],
+    colors,
+    gravity: 650,
+    drag: 1.1,
+    shape: 'rect',
+  })
+}
+
 export function confetti(sys: ParticleSystem, width: number, colors: string[], scale = 1): void {
   const count = Math.round(120 * scale)
   for (let i = 0; i < count; i++) {

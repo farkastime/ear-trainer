@@ -91,6 +91,14 @@ describe('createToneSfx', () => {
     expect(by('metal').starts).toHaveLength(2)
   })
 
+  it('wrong is a single descending noise sweep on the noise synth', () => {
+    const sfx = createToneSfx()
+    sfx.wrong()
+    expect(by('noise').starts).toHaveLength(1)
+    expect(by('drum').starts).toHaveLength(0)
+    expect(by('metal').starts).toHaveLength(0)
+  })
+
   it('later real time wins over the monotonic floor', () => {
     const sfx = createToneSfx()
     sfx.pop()

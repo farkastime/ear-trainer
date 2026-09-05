@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { mulberry32 } from '../core/engine/rng'
-import { burst, confetti, firework, flames, fountain, steam } from './emitters'
+import { burst, cannon, confetti, firework, flames, fountain, steam } from './emitters'
 import { ParticleSystem } from './particles'
 
 const sys = () => new ParticleSystem(5000, mulberry32(2))
@@ -48,6 +48,18 @@ describe('emitters', () => {
     expect(hot.count).toBeGreaterThan(warm.count)
     expect(warm.count).toBeGreaterThan(0)
     expect(hot.particles.every((p) => p.y >= 800 - 5 && p.vy < 0)).toBe(true)
+  })
+
+  it('cannon sprays confetti rightward from its origin and it falls', () => {
+    const s = sys()
+    cannon(s, 20, 100, ['#f0f'], 1)
+    expect(s.count).toBeGreaterThan(20)
+    expect(s.particles.every((p) => p.x === 20 && p.y === 100)).toBe(true)
+    expect(s.particles.every((p) => p.vx > 0)).toBe(true)
+    expect(s.particles.every((p) => p.gravity > 0)).toBe(true)
+    const calm = sys()
+    cannon(calm, 20, 100, ['#f0f'], 0.25)
+    expect(calm.count).toBeLessThan(s.count)
   })
 
   it('steam rises from the edges', () => {

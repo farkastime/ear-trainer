@@ -247,6 +247,9 @@ button {
   color: rgba(255, 255, 255, 0.9);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
+.tile.dim {
+  opacity: 0.45;
+}
 .tile.napping {
   filter: grayscale(0.7);
   opacity: 0.55;
@@ -335,9 +338,14 @@ button {
 
 .trail {
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+.trail-row {
+  display: flex;
   gap: 6px;
   justify-content: center;
-  flex-wrap: wrap;
 }
 .trail .dot {
   width: 12px;
@@ -418,6 +426,8 @@ button {
 .celebration-canvas {
   position: fixed;
   inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   z-index: 30;
 }

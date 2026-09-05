@@ -35,7 +35,14 @@ const summary = {
 }
 
 describe('CelebrationLayer', () => {
-  it('bursts and pops on a correct answer, steams on a miss', () => {
+  it('sizes the canvas to the viewport in CSS pixels regardless of device pixel ratio', () => {
+    const { container } = renderApp(<CelebrationLayer system={new ParticleSystem(10)} />)
+    const canvas = container.querySelector('canvas')!
+    expect(canvas.style.width).toBe('100%')
+    expect(canvas.style.height).toBe('100%')
+  })
+
+  it('fires confetti on a correct answer; a miss plays the wrong sound with no particles', () => {
     const system = new ParticleSystem(5000, mulberry32(1))
     const sfx = createNullSfx()
     renderApp(<CelebrationLayer system={system} />, { sfx })
@@ -59,8 +66,8 @@ describe('CelebrationLayer', () => {
         },
       ]),
     )
-    expect(system.count).toBeGreaterThan(before)
-    expect(sfx.calls).toEqual(['pop', 'steam'])
+    expect(system.count).toBe(before)
+    expect(sfx.calls).toEqual(['pop', 'wrong'])
   })
 
   it('launches a staggered barrage on level up and confetti on session complete', () => {

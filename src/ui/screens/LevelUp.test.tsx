@@ -23,19 +23,35 @@ beforeEach(() => {
 afterEach(() => vi.useRealTimers())
 
 describe('LevelUp', () => {
-  it('reveals the new character, plays its chord three times, and continues with a primer', () => {
+  it('reveals the new character, plays its chord three times, and continues with a primer', async () => {
     expect(useAppStore.getState().session?.phase).toBe('levelUp')
     const player = createNullPlayer()
     const sfx = createNullSfx()
     renderApp(<LevelUp />, { player, sfx })
     expect(screen.getByText(/meet whale/i)).toBeInTheDocument()
     expect(sfx.calls).toContain('fanfare')
-    act(() => vi.advanceTimersByTime(3500))
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3500)
+    })
     expect(player.played).toHaveLength(3)
     fireEvent.click(screen.getByText('🐳'))
     expect(player.played).toHaveLength(4)
     fireEvent.click(screen.getByRole('button', { name: /continue/i }))
     expect(useAppStore.getState().session?.phase).toBe('question')
     expect(useAppStore.getState().pendingPrimer).toEqual(['red', 'yellow', 'blue'])
+  })
+
+  it('loads the new chord samples for the profile instrument before playing', async () => {
+    const player = createNullPlayer()
+    const sfx = createNullSfx()
+    renderApp(<LevelUp />, { player, sfx })
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0)
+    })
+    expect(player.loaded).toContain('piano')
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3500)
+    })
+    expect(player.played).toHaveLength(3)
   })
 })

@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
+import { loadWithFallback } from '../../audio/loading'
 import { chordById } from '../../core/content/chords'
 import { newestUnlockedId } from '../../core/content/curriculum'
+import { DEFAULT_INSTRUMENT_ID, instrumentById } from '../../core/content/instruments'
 import { activeProfile, useAppStore } from '../../state/store'
 import { useAudio } from '../AudioContext'
 
@@ -16,10 +18,24 @@ export function LevelUp() {
   useEffect(() => {
     if (!chord || !profile) return
     if (profile.settings.celebrationSound) sfx.fanfare()
-    const timers = PLAYS.map((ms) =>
-      setTimeout(() => player.playChord([...chord.notes], REVEAL_SECONDS), ms),
-    )
-    return () => timers.forEach(clearTimeout)
+    let cancelled = false
+    let timers: ReturnType<typeof setTimeout>[] = []
+    const schedulePlays = () => {
+      if (cancelled) return
+      timers = PLAYS.map((ms) =>
+        setTimeout(() => player.playChord([...chord.notes], REVEAL_SECONDS), ms),
+      )
+    }
+    const instrument = instrumentById(profile.settings.instrumentId)
+    // The Sampler pitch-shifts from the nearest loaded sample, so a failed
+    // load still produces audible (if less accurate) playback.
+    loadWithFallback(player, instrument, [...chord.notes], instrumentById(DEFAULT_INSTRUMENT_ID))
+      .catch(() => {})
+      .then(schedulePlays)
+    return () => {
+      cancelled = true
+      timers.forEach(clearTimeout)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chord?.id])
 

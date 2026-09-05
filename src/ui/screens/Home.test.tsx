@@ -71,10 +71,13 @@ describe('Home', () => {
     expect(screen.getByText(/ready for a new friend/i)).toBeInTheDocument()
   })
 
-  it('gear goes to parent screen and switch player goes to profiles', () => {
+  it('gear goes to parent screen, info to about, and switch player to profiles', () => {
     renderApp(<Home />)
     fireEvent.click(screen.getByRole('button', { name: /grown-ups/i }))
     expect(useAppStore.getState().screen).toBe('parent')
+    useAppStore.setState({ screen: 'home' })
+    fireEvent.click(screen.getByRole('button', { name: /about earbuddies/i }))
+    expect(useAppStore.getState().screen).toBe('about')
     useAppStore.setState({ screen: 'home' })
     fireEvent.click(screen.getByRole('button', { name: /switch profile/i }))
     expect(useAppStore.getState().screen).toBe('profiles')

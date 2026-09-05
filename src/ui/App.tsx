@@ -4,6 +4,7 @@ import { download } from '../state/exportImport'
 import { useAppStore } from '../state/store'
 import { BACKUP_KEY } from '../state/storage'
 import { AppHeader } from './components/AppHeader'
+import { About } from './screens/About'
 import { GetReady } from './screens/GetReady'
 import { Home } from './screens/Home'
 import { LevelUp } from './screens/LevelUp'
@@ -89,6 +90,7 @@ export function App() {
       {screen === 'session' && phase === 'levelUp' && <LevelUp />}
       {screen === 'summary' && <Summary />}
       {screen === 'parent' && <ParentSettings />}
+      {screen === 'about' && <About />}
       <CelebrationLayer />
     </ErrorBoundary>
   )

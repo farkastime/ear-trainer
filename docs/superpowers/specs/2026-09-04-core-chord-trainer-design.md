@@ -461,7 +461,7 @@ flames; the heat vignette still shifts color). Celebration sound has its own on/
 ## 10. Screens
 
 1. **Profile picker** — big avatar tiles, "new profile".
-2. **Home** — star total, gear (parent gate), champion badge when
+2. **Home** — star total, info (About) and gear (parent gate), champion badge when
    applicable, then **Practice!**: a "My chords / All chords" toggle (saved
    per profile) above the real tile grid. Tapping a tile plays its chord, so
    a child can learn the sounds before being tested; this is also where a
@@ -479,6 +479,11 @@ flames; the heat vignette still shifts color). Celebration sound has its own on/
 5. **Level-up takeover** — overlay and primer (§6.3).
 6. **Session summary** — §7.3.
 7. **Parent settings** — §9.
+8. **About** — welcome text, the Eguchi method with research citations,
+   how the app works (practice, play, streaks, unlocks, naps, overtime), the
+   three pacing modes with their default parameters, and tips. Reached from
+   the info button on Home; no gate, since it holds nothing a child can
+   change.
 
 The app is dark-themed: a deep grey with a hint of purple (`#262231`) as the
 ground, light text, and the chord colors carrying all the saturation.

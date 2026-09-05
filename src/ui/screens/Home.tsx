@@ -62,6 +62,9 @@ export function Home() {
           {profile.avatarEmoji}
         </button>
         <h1 className="screen-title grow">Hi, {profile.name}!</h1>
+        <button className="icon-button" aria-label="About EarBuddies" onClick={() => goTo('about')}>
+          ℹ️
+        </button>
         <button className="icon-button" aria-label="Grown-ups" onClick={() => goTo('parent')}>
           ⚙️
         </button>

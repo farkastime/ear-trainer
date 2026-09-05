@@ -12,7 +12,7 @@ import { clampSettings, newProfile } from './profile'
 import { STORAGE_KEY, createSafeStorage, type SafeStorage } from './storage'
 import { randomId } from './uuid'
 
-export type Screen = 'profiles' | 'home' | 'getReady' | 'session' | 'summary' | 'parent'
+export type Screen = 'profiles' | 'home' | 'getReady' | 'session' | 'summary' | 'parent' | 'about'
 
 export interface AppState extends PersistedSlice {
   screen: Screen

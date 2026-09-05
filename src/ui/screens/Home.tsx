@@ -16,7 +16,7 @@ export function Home() {
       <div className="row">
         <button
           className="icon-button"
-          aria-label="Switch player"
+          aria-label="Switch profile"
           onClick={() => selectProfile(null)}
         >
           {profile.avatarEmoji}

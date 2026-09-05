@@ -43,7 +43,7 @@ describe('Home', () => {
     fireEvent.click(screen.getByRole('button', { name: /grown-ups/i }))
     expect(useAppStore.getState().screen).toBe('parent')
     useAppStore.setState({ screen: 'home' })
-    fireEvent.click(screen.getByRole('button', { name: /switch player/i }))
+    fireEvent.click(screen.getByRole('button', { name: /switch profile/i }))
     expect(useAppStore.getState().screen).toBe('profiles')
   })
 })

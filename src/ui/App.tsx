@@ -4,6 +4,7 @@ import { download } from '../state/exportImport'
 import { useAppStore } from '../state/store'
 import { BACKUP_KEY } from '../state/storage'
 import { AppHeader } from './components/AppHeader'
+import { SessionMascot } from './components/SessionMascot'
 import { About } from './screens/About'
 import { GetReady } from './screens/GetReady'
 import { Home } from './screens/Home'
@@ -88,6 +89,7 @@ export function App() {
       {screen === 'getReady' && <GetReady />}
       {screen === 'session' && <Session />}
       {screen === 'session' && phase === 'levelUp' && <LevelUp />}
+      {screen === 'session' && <SessionMascot />}
       {screen === 'summary' && <Summary />}
       {screen === 'parent' && <ParentSettings />}
       {screen === 'about' && <About />}

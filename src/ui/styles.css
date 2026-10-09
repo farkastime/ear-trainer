@@ -730,3 +730,83 @@ button {
 .about .small {
   font-size: 0.85rem;
 }
+
+/* mascot spike: a decorative corner reactor, overlaid so the tile grid keeps its slack */
+.mascot {
+  position: fixed;
+  right: 8px;
+  bottom: 8px;
+  width: var(--mascot-size);
+  height: var(--mascot-size);
+  z-index: 4;
+  pointer-events: none;
+  --mascot-size: 96px;
+}
+/* One cell of a 7-across sheet; --cell picks it. */
+.mascot-sprite {
+  width: 100%;
+  height: 100%;
+  background-image: url('/mascot/placeholder.png');
+  background-repeat: no-repeat;
+  background-size: 700% 100%;
+  background-position: calc(var(--cell) * var(--mascot-size) * -1) 0;
+}
+.mascot-idle .mascot-sprite {
+  animation: mascot-breathe 3.2s ease-in-out infinite;
+}
+.mascot-cheer .mascot-sprite {
+  animation: mascot-cheer 0.4s ease-in-out 3;
+}
+.mascot-tilt .mascot-sprite {
+  animation: mascot-tilt 1.1s ease-in-out;
+}
+/* Bigger reactions dip in from off-screen right, hold, then dip back out. */
+.mascot-big {
+  animation: mascot-dip 2.2s ease-in-out;
+}
+.mascot-loop {
+  transform: scale(1.25);
+}
+.mascot-loop .mascot-sprite {
+  animation: mascot-cheer 0.5s ease-in-out infinite;
+}
+@keyframes mascot-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+}
+@keyframes mascot-cheer {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-14px) scale(1.12);
+  }
+}
+@keyframes mascot-tilt {
+  0%,
+  100% {
+    transform: translateY(0) scale(0.92);
+  }
+  40%,
+  60% {
+    transform: translateY(-4px) scale(0.96);
+  }
+}
+@keyframes mascot-dip {
+  0% {
+    transform: translateX(140%) scale(1.3);
+  }
+  18%,
+  78% {
+    transform: translateX(0) scale(1.3);
+  }
+  100% {
+    transform: translateX(140%) scale(1.3);
+  }
+}
